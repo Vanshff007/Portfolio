@@ -49,17 +49,46 @@
   .stat-label{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.3rem;}
   #projects{background:var(--bg);}
   .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
-  .project-card{background:var(--surface);border:1px solid var(--border);padding:2rem;position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.3s;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));}
-  .project-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(0,255,136,0.03));opacity:0;transition:opacity 0.3s;}
+  .project-card{background:var(--surface);border:1px solid var(--border);padding:2rem;position:relative;
+    /* FIX: overflow:hidden was clipping click area of child buttons — removed */
+    transition:border-color 0.3s,transform 0.3s;
+    clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));}
+  .project-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(0,255,136,0.03));opacity:0;transition:opacity 0.3s;
+    /* FIX: pointer-events:none so ::after overlay never blocks child clicks */
+    pointer-events:none;}
   .project-card:hover{border-color:rgba(0,255,136,0.3);transform:translateY(-4px);}.project-card:hover::after{opacity:1;}
   .project-num{font-size:0.62rem;color:var(--accent);letter-spacing:0.2em;margin-bottom:1.2rem;}
   .project-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:0.75rem;}
   .project-desc{color:var(--muted);font-size:0.78rem;line-height:1.7;margin-bottom:1.5rem;}
   .project-tech{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;}
   .tech-chip{padding:0.2rem 0.6rem;background:rgba(123,97,255,0.1);border:1px solid rgba(123,97,255,0.25);color:var(--accent3);font-size:0.6rem;letter-spacing:0.08em;}
-  .project-links{display:flex;gap:1rem;}
-  .project-link{font-size:0.65rem;color:var(--muted);text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;display:flex;align-items:center;gap:0.4rem;}
-  .project-link:hover{color:var(--accent);}.project-link::after{content:'→';}
+  .project-links{display:flex;gap:1rem;position:relative;z-index:2;}
+  /* FIX: cursor:none on project-link was suppressing pointer-events in some browsers.
+     Use cursor:inherit so the body's cursor:none is inherited safely,
+     and pointer-events stays fully enabled. */
+  .project-link{
+    font-size:0.65rem;color:var(--muted);text-decoration:none;
+    letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;
+    display:inline-flex;align-items:center;gap:0.4rem;
+    background:none;border:none;font-family:'JetBrains Mono',monospace;
+    padding:0.2rem 0;
+    cursor:inherit;          /* inherit cursor:none from body — safe */
+    position:relative;z-index:2;  /* sit above card ::after overlay */
+  }
+  .project-link:hover{color:var(--accent);}
+  .project-link::after{content:'→';margin-left:0.3rem;}
+
+  /* ── Render wake-up overlay ── */
+  .wake-overlay{display:none;position:fixed;inset:0;z-index:9990;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;}
+  .wake-overlay.active{display:flex;}
+  .wake-spinner{width:48px;height:48px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spinFast 0.8s linear infinite;}
+  .wake-msg{font-size:0.78rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;}
+  .wake-sub{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-align:center;max-width:300px;line-height:1.6;}
+  .wake-bar-wrap{width:220px;height:2px;background:var(--border);}
+  .wake-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width 0.15s linear;}
+  .wake-dismiss{font-size:0.6rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;cursor:inherit;margin-top:0.5rem;}
+  @keyframes spinFast{to{transform:rotate(360deg);}}
+
   #skills{background:var(--surface);}
   .skills-layout{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;}
   .skill-group{padding:2rem;border:1px solid var(--border);background:var(--bg);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
@@ -75,8 +104,7 @@
   .contact-text h2 .outline{-webkit-text-stroke:1.5px var(--text);color:transparent;}
   .contact-text p{color:var(--muted);font-size:0.82rem;line-height:1.8;margin-bottom:2rem;}
   .contact-links{display:flex;flex-direction:column;gap:1rem;}
-  /* Unified social button */
-  .social-btn{display:flex;align-items:center;gap:1rem;text-decoration:none;cursor:none;padding:1rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;color:var(--text);transition:all 0.2s;}
+  .social-btn{display:flex;align-items:center;gap:1rem;text-decoration:none;cursor:inherit;padding:1rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;color:var(--text);transition:all 0.2s;}
   .social-btn-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .social-btn-icon svg{width:16px;height:16px;}
   .social-btn-label{display:flex;flex-direction:column;gap:0.1rem;}
@@ -99,6 +127,21 @@
   .form-label{font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;}
   .form-input,.form-textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.85rem 1rem;outline:none;transition:border-color 0.2s;resize:none;}
   .form-input:focus,.form-textarea:focus{border-color:var(--accent);}.form-textarea{height:120px;}
+  .form-toast{display:none;align-items:center;gap:0.75rem;padding:0.85rem 1.2rem;font-size:0.72rem;letter-spacing:0.08em;border:1px solid;margin-top:0.25rem;}
+  .form-toast.show{display:flex;}
+  .form-toast.success{border-color:rgba(0,255,136,0.35);background:rgba(0,255,136,0.07);color:var(--accent);}
+  .form-toast.error{border-color:rgba(255,62,108,0.35);background:rgba(255,62,108,0.07);color:var(--accent2);}
+  .form-toast-icon{font-size:1rem;flex-shrink:0;}
+  #submit-btn{align-self:flex-start;cursor:inherit;position:relative;overflow:hidden;}
+  #submit-btn:disabled{opacity:0.6;pointer-events:none;}
+  #submit-btn .btn-text{transition:opacity 0.2s;}
+  #submit-btn .btn-spinner{display:none;position:absolute;inset:0;align-items:center;justify-content:center;gap:4px;}
+  #submit-btn.loading .btn-text{opacity:0;}
+  #submit-btn.loading .btn-spinner{display:flex;}
+  .btn-dot{width:5px;height:5px;background:#000;border-radius:50%;animation:btnBounce 0.6s infinite alternate;}
+  .btn-dot:nth-child(2){animation-delay:0.15s;}
+  .btn-dot:nth-child(3){animation-delay:0.3s;}
+  @keyframes btnBounce{from{transform:translateY(0);}to{transform:translateY(-4px);}}
   footer{padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
   footer p{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;}.footer-accent{color:var(--accent);}
   @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -111,6 +154,15 @@
 <body>
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
+
+<div class="wake-overlay" id="wakeOverlay" role="status" aria-live="polite">
+  <div class="wake-spinner"></div>
+  <div class="wake-msg" id="wakeMsg">Waking up server…</div>
+  <div class="wake-sub">Render free tier sleeps when idle — this takes ~8 seconds. Hang tight!</div>
+  <div class="wake-bar-wrap"><div class="wake-bar" id="wakeBar"></div></div>
+  <span class="wake-dismiss" id="wakeDismiss">Click anywhere to cancel</span>
+</div>
+
 <nav>
   <div class="logo">vansh<span>.</span>dev</div>
   <ul>
@@ -176,7 +228,13 @@
         <span class="tech-chip">HTML</span><span class="tech-chip">CSS</span><span class="tech-chip">JavaScript</span>
         <span class="tech-chip">Node.js</span><span class="tech-chip">Express.js</span><span class="tech-chip">Socket.io</span>
       </div>
-      <div class="project-links"><a href="https://paint-together-hchq.onrender.com/" target="_blank" class="project-link">Live Demo</a></div>
+      <div class="project-links">
+        <button class="project-link render-btn"
+                data-render-url="https://paint-together-hchq.onrender.com/"
+                data-ping-url="https://paint-together-hchq.onrender.com/">
+          Live Demo
+        </button>
+      </div>
     </div>
     <div class="project-card reveal" style="transition-delay:0.1s">
       <div class="project-num">02 / Project</div>
@@ -185,7 +243,9 @@
       <div class="project-tech">
         <span class="tech-chip">HTML</span><span class="tech-chip">CSS</span><span class="tech-chip">JavaScript</span>
       </div>
-      <div class="project-links"><a href="https://vanshff007.github.io/To-do-app/" target="_blank" class="project-link">Live Demo</a></div>
+      <div class="project-links">
+        <a href="https://vanshff007.github.io/To-do-app/" target="_blank" rel="noopener noreferrer" class="project-link">Live Demo</a>
+      </div>
     </div>
   </div>
 </section>
@@ -233,65 +293,233 @@
       <h2>Let's build something<br><span class="outline">great</span> together.</h2>
       <p>Open to internships, collaborations, and interesting projects. Drop me a message and I'll get back to you soon.</p>
       <div class="contact-links">
-        <!-- Gmail -->
         <a href="mailto:vansh31082005@gmail.com" class="social-btn btn-gmail">
-          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.908 1.528-1.147C21.69 2.28 24 3.434 24 5.457z" fill="#ea4335"/></svg></div>
+          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.908 1.528-1.147C21.69 2.28 24 3.434 24 5.457z" fill="#ea4335"/></svg></div>
           <div class="social-btn-label"><span class="social-btn-site">Gmail</span><span class="social-btn-handle">vansh31082005@gmail.com</span></div>
         </a>
-        <!-- GitHub -->
-        <a href="https://github.com/Vanshff007" target="_blank" class="social-btn btn-github">
-          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#e6edf3"/></svg></div>
+        <a href="https://github.com/Vanshff007" target="_blank" rel="noopener noreferrer" class="social-btn btn-github">
+          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#e6edf3"/></svg></div>
           <div class="social-btn-label"><span class="social-btn-site">GitHub</span><span class="social-btn-handle">Vanshff007</span></div>
         </a>
-        <!-- LinkedIn -->
-        <a href="https://www.linkedin.com/in/vansh-minhas-913b1a291/" target="_blank" class="social-btn btn-linkedin">
-          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#4da3ff"/></svg></div>
+        <a href="https://www.linkedin.com/in/vansh-minhas-913b1a291/" target="_blank" rel="noopener noreferrer" class="social-btn btn-linkedin">
+          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#4da3ff"/></svg></div>
           <div class="social-btn-label"><span class="social-btn-site">LinkedIn</span><span class="social-btn-handle">vansh-minhas</span></div>
         </a>
-        <!-- LeetCode -->
-        <a href="https://leetcode.com/u/idgaf_vansh/" target="_blank" class="social-btn btn-leetcode">
-          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z" fill="#ffa116"/></svg></div>
+        <a href="https://leetcode.com/u/idgaf_vansh/" target="_blank" rel="noopener noreferrer" class="social-btn btn-leetcode">
+          <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z" fill="#ffa116"/></svg></div>
           <div class="social-btn-label"><span class="social-btn-site">LeetCode</span><span class="social-btn-handle">idgaf_vansh</span></div>
         </a>
       </div>
     </div>
-    <div class="contact-form reveal" style="transition-delay:0.15s">
+
+    <form id="contactForm"
+          class="contact-form reveal"
+          style="transition-delay:0.15s"
+          action="https://formspree.io/f/mvzdpgne"
+          method="POST"
+          novalidate>
       <div class="form-group">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-input" placeholder="Your name">
+        <label class="form-label" for="cf-name">Name</label>
+        <input id="cf-name" name="name" type="text" class="form-input" placeholder="Your name" required>
       </div>
       <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-input" placeholder="your@email.com">
+        <label class="form-label" for="cf-email">Email</label>
+        <input id="cf-email" name="email" type="email" class="form-input" placeholder="your@email.com" required>
       </div>
       <div class="form-group">
-        <label class="form-label">Message</label>
-        <textarea class="form-textarea" placeholder="Tell me about your project..."></textarea>
+        <label class="form-label" for="cf-msg">Message</label>
+        <textarea id="cf-msg" name="message" class="form-textarea" placeholder="Tell me about your project..." required></textarea>
       </div>
-      <button class="btn btn-primary" style="align-self:flex-start;cursor:none">Send Message →</button>
-    </div>
+      <div class="form-toast" id="formToast" role="alert">
+        <span class="form-toast-icon" id="toastIcon"></span>
+        <span id="toastText"></span>
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">
+        <span class="btn-text">Send Message →</span>
+        <span class="btn-spinner" aria-hidden="true">
+          <span class="btn-dot"></span><span class="btn-dot"></span><span class="btn-dot"></span>
+        </span>
+      </button>
+    </form>
   </div>
 </section>
 <footer>
   <p>© 2026 <span class="footer-accent">Vansh Minhas</span> · Built with intention</p>
   <p style="font-size:0.6rem">Designed & coded from scratch</p>
 </footer>
+
 <script>
-  const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
-  function animCursor(){cursor.style.left=mx+'px';cursor.style.top=my+'px';rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animCursor);}
-  animCursor();
-  document.querySelectorAll('a,button,.project-card').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2)';ring.style.borderColor='rgba(0,255,136,0.8)';ring.style.width='50px';ring.style.height='50px';});
-    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.borderColor='rgba(0,255,136,0.4)';ring.style.width='36px';ring.style.height='36px';});
+/* ── Custom cursor ── */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a, button, .project-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(2)';
+    ring.style.borderColor = 'rgba(0,255,136,0.8)';
+    ring.style.width = ring.style.height = '50px';
   });
-  const reveals=document.querySelectorAll('.reveal');
-  const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.12});
-  reveals.forEach(el=>io.observe(el));
-  const skillBars=document.querySelectorAll('.skill-bar');
-  const sbObserver=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const t=e.target,w=t.style.width;t.style.width='0';setTimeout(()=>{t.style.width=w;},100);sbObserver.unobserve(t);}});},{threshold:0.5});
-  skillBars.forEach(b=>sbObserver.observe(b));
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+    ring.style.borderColor = 'rgba(0,255,136,0.4)';
+    ring.style.width = ring.style.height = '36px';
+  });
+});
+
+/* ── Scroll reveal ── */
+const reveals = document.querySelectorAll('.reveal');
+new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 }).observe ? (() => {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => io.observe(el));
+})() : reveals.forEach(el => el.classList.add('visible'));
+
+/* ── Skill bars ── */
+const sbObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const t = e.target, w = t.style.width;
+      t.style.width = '0';
+      setTimeout(() => { t.style.width = w; }, 100);
+      sbObs.unobserve(t);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.skill-bar').forEach(b => sbObs.observe(b));
+
+/* ── Render wake-up launcher ──────────────────────────────────────
+   FIX: Removed inline onclick. Using addEventListener instead —
+   this avoids scope issues and works correctly even when the click
+   originates from a child text node inside the button.
+────────────────────────────────────────────────────────────────── */
+const WAKE_MS = 8000;
+let wakeTimer = null;
+
+function closeWakeOverlay() {
+  if (wakeTimer) { clearInterval(wakeTimer); wakeTimer = null; }
+  document.getElementById('wakeOverlay').classList.remove('active');
+  document.getElementById('wakeBar').style.width = '0%';
+  document.getElementById('wakeMsg').textContent = 'Waking up server…';
+}
+
+function launchRender(targetUrl, pingUrl) {
+  const overlay = document.getElementById('wakeOverlay');
+  const bar     = document.getElementById('wakeBar');
+  const msg     = document.getElementById('wakeMsg');
+
+  overlay.classList.add('active');
+  bar.style.width = '0%';
+  msg.textContent = 'Waking up server…';
+
+  // Fire-and-forget ping to wake the dyno
+  fetch(pingUrl, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+
+  const STATUS = [[0,'Waking up server…'],[3000,'Almost there — starting up…'],[6000,'Nearly ready…']];
+  let elapsed = 0;
+  const TICK  = 80;
+  if (wakeTimer) clearInterval(wakeTimer);
+
+  wakeTimer = setInterval(() => {
+    elapsed += TICK;
+    bar.style.width = Math.min((elapsed / WAKE_MS) * 100, 97) + '%';
+    STATUS.forEach(([t, text]) => { if (elapsed >= t) msg.textContent = text; });
+
+    if (elapsed >= WAKE_MS) {
+      clearInterval(wakeTimer); wakeTimer = null;
+      bar.style.width = '100%';
+      setTimeout(() => {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        closeWakeOverlay();
+      }, 300);
+    }
+  }, TICK);
+}
+
+// Attach clicks to all .render-btn buttons via addEventListener (not inline onclick)
+document.querySelectorAll('.render-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation(); // don't bubble up to .project-card
+    const url  = this.dataset.renderUrl;
+    const ping = this.dataset.pingUrl || url;
+    if (url) launchRender(url, ping);
+  });
+});
+
+// Overlay cancel: only close if user clicked the backdrop, not a child element
+document.getElementById('wakeOverlay').addEventListener('click', closeWakeOverlay);
+document.getElementById('wakeDismiss').addEventListener('click', e => {
+  e.stopPropagation();
+  closeWakeOverlay();
+});
+
+/* ── Contact form (Formspree) ── */
+(function () {
+  const form      = document.getElementById('contactForm');
+  const submitBtn = document.getElementById('submit-btn');
+  const toast     = document.getElementById('formToast');
+  const toastIcon = document.getElementById('toastIcon');
+  const toastText = document.getElementById('toastText');
+  let toastTimer  = null;
+
+  function showToast(type, message) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toast.className = 'form-toast show ' + type;
+    toastIcon.textContent = type === 'success' ? '✓' : '✕';
+    toastText.textContent = message;
+    toastTimer = setTimeout(() => { toast.className = 'form-toast'; }, 6000);
+  }
+
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitBtn.classList.toggle('loading', on);
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const nameVal  = form.querySelector('[name="name"]').value.trim();
+    const emailVal = form.querySelector('[name="email"]').value.trim();
+    const msgVal   = form.querySelector('[name="message"]').value.trim();
+    const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!nameVal || !emailVal || !msgVal) {
+      showToast('error', 'Please fill in all fields before sending.');
+      return;
+    }
+    if (!emailRe.test(emailVal)) {
+      showToast('error', "That email address doesn't look right.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(form),
+      });
+      if (res.ok) {
+        showToast('success', "Message sent! I'll get back to you soon.");
+        form.reset();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast('error', data?.errors?.[0]?.message || 'Something went wrong — try emailing me directly.');
+      }
+    } catch {
+      showToast('error', 'Network error — check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  });
+})();
 </script>
 </body>
 </html>
