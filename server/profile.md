@@ -32,16 +32,16 @@
 - 505+ problems solved on LeetCode, contest rating about 1743 (top ~11%).
 
 ## Technical skills
-- Languages: C, C++, Python, JavaScript.
-- Frontend: HTML, CSS, React.js, Next.js, Tailwind CSS, Canvas API.
-- Backend: Node.js, Express.js, REST APIs, Socket.IO, WebSockets, JWT authentication.
-- Databases: MongoDB (Mongoose), MySQL, Firebase.
-- Tools: Git, GitHub, Docker, VS Code, GitHub Actions, Vercel, Render.
-- AI/ML: TensorFlow/Keras, NLP (LSTM, NLTK), RAG with FAISS vector search, Streamlit.
+- Languages: Python, C++, SQL, JavaScript (also C).
+- Data & ML: Pandas, NumPy, scikit-learn, Matplotlib, model evaluation (train-test split, precision, recall, F1-score, confusion matrix, ROC-AUC), classification.
+- NLP & AI: text classification, RAG, embeddings, vector search, LangChain, Ollama; TensorFlow/Keras (LSTM).
+- Web development: HTML, CSS, JavaScript, Tailwind CSS, React.js, Next.js, Node.js, Express.js, REST APIs, Socket.IO, WebSockets, JWT authentication.
+- Databases: PostgreSQL, pgvector, MongoDB (Mongoose), MySQL, Firebase.
+- Tools: Git, GitHub, Docker, Jupyter Notebook, Streamlit, VS Code, Vercel, Render.
 
 ## Projects
 - **CodeArena** — real-time 1v1 competitive coding battles. Two players get the same problem; the first correct submission wins. Code runs sandboxed in Docker (C++, Java, Python). JWT auth, protected routes, rating-based matchmaking on shared problem-solving topics, leaderboards, match history, replays, spectators and a skill radar. Stack: React, Vite, Tailwind, Monaco Editor, Node.js, Express, Socket.io, MongoDB, Docker, Vitest. Repo: https://github.com/Vanshff007/Code_Arena
 - **Paint Together** — real-time collaborative drawing app. Rooms with 6-character codes or links, brush/eraser/colors, shared undo/redo (30 steps per room), live cursors, chat, host controls, autosave to MongoDB, PNG download, dark mode. Stack: vanilla JS, Canvas API, Node.js, Express, Socket.io, MongoDB, node:test. Live on Render: https://paint-together-hchq.onrender.com/
 - **RAG Application** — ask questions about your own PDF, TXT or DOCX files. Chunking, embeddings, FAISS vector search, LLM query expansion, a document-only mode and a hybrid mode. Streamlit UI plus a CLI. Stack: Python, Streamlit, FAISS, LangChain. Repo: https://github.com/Vanshff007/RAG_Application
-- **Hate Speech Classifier (VirtuShield)** — multi-label classifier (toxic, severe toxic, obscene, threat, insult, identity hate) using a Bidirectional LSTM trained on the Jigsaw Toxic Comment dataset, served in a Streamlit app. Stack: Python, TensorFlow, NLTK, scikit-learn, Pandas.
+- **Hate Speech Classifier (VirtuShield)** — multi-label classifier (toxic, severe toxic, obscene, threat, insult, identity hate) trained on the Wikipedia Talk Page edits data (Jigsaw Toxic Comment dataset). Includes preprocessing, EDA, feature engineering, a Bidirectional LSTM model, evaluation with mean column-wise ROC-AUC, and a Streamlit app. Stack: Python, TensorFlow, NLTK, scikit-learn, Pandas.
 - **Portfolio** — this website. Hand-coded HTML/CSS/JS with an interactive terminal, command palette, themes, games, live GitHub and LeetCode stats, and this AI assistant (Node server + Gemini API).
