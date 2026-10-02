@@ -76,7 +76,7 @@ const TIMELINE = [
    New repos still show up automatically using their GitHub data.
 ────────────────────────────────────────────────────────────────── */
 const GH_USER = 'Vanshff007';
-const GH_EXCLUDE = ['Vanshff007', 'tic-tac-toe-firebase', 'CodeArena', 'my-portfolio', 'code-together']; // profile README, empty repo, early stub, old portfolio, hidden by choice
+const GH_EXCLUDE = ['Vanshff007', 'tic-tac-toe-firebase', 'CodeArena', 'my-portfolio', 'code-together', 'Tic-Tac-Toe', 'To-do-app']; // profile README, empty repo, early stub, old portfolio, hidden by choice
 const PROJECT_INFO = {
   'Code_Arena': {
     title: 'CodeArena', category: 'Full-Stack',
@@ -128,27 +128,6 @@ const PROJECT_INFO = {
     ],
     outcome: 'EDA notebooks plus a Streamlit app for live predictions.',
   },
-  'Tic-Tac-Toe': {
-    title: 'Tic Tac Toe', category: 'Frontend',
-    desc: 'Tic Tac Toe with local, AI and online multiplayer modes. Shareable room codes, synced rematches, win-line animations and Web Audio sound effects.',
-    tech: ['JavaScript', 'Firebase', 'Web Audio API', 'HTML', 'CSS'],
-    problem: 'A classic game, built to explore real-time sync without running a server.',
-    arch: ['Vanilla JS UI', 'AI engine', 'Firebase Realtime DB', 'Firebase Hosting'],
-    challenges: [
-      'Online play with no custom backend: Firebase syncs moves between players in a room.',
-      'Synced rematches: one player requests a reset and the other accepts or declines in real time.',
-    ],
-    outcome: 'Three modes, shareable rooms and sound effects made with the Web Audio API.',
-  },
-  'To-do-app': {
-    title: 'To-Do App', category: 'Frontend',
-    desc: 'Task manager with dashboard, calendar and stats screens, built as a modular vanilla-JS single-page app with a custom router and local storage.',
-    tech: ['JavaScript', 'HTML', 'CSS', 'LocalStorage'],
-    problem: 'A practice in building a real single-page app without a framework.',
-    arch: ['Custom router', 'View modules', 'LocalStorage'],
-    challenges: ['Writing a small hash router and keeping views modular without a framework.'],
-    outcome: 'Dashboard, calendar and stats views, all offline in the browser.',
-  },
   'Portfolio': {
     title: 'Portfolio', category: 'Frontend',
     desc: 'This site. Hand-coded portfolio with live GitHub data, an interactive terminal and canvas effects.',
@@ -162,7 +141,7 @@ const PROJECT_INFO = {
     outcome: 'Terminal, command palette, themes, games, live stats and an AI assistant.',
   },
 };
-const FEATURED_ORDER = ['Code_Arena', 'paint-together', 'RAG_Application', 'Hate-Speech-Classifier', 'Tic-Tac-Toe', 'To-do-app', 'Portfolio'];
+const FEATURED_ORDER = ['Code_Arena', 'paint-together', 'RAG_Application', 'Hate-Speech-Classifier', 'Portfolio'];
 const LANG_COLORS = { JavaScript: '#f1e05a', Python: '#3572A5', HTML: '#e34c26', CSS: '#663399', 'Jupyter Notebook': '#DA5B0B', TypeScript: '#3178c6', Java: '#b07219', 'C++': '#f34b7d' };
 
 /* ── Skills shown in the bar view and the graph view ── */

@@ -8,7 +8,7 @@ let PROJECTS = [];
   const grid   = document.getElementById('projectsGrid');
   const bar    = document.getElementById('filterBar');
   const status = document.getElementById('ghStatus');
-  const CACHE_KEY = 'gh-projects-v3', TTL = 60 * 60 * 1000;
+  const CACHE_KEY = 'gh-projects-v4', TTL = 60 * 60 * 1000;
 
   const prettify = name => name.replace(/[-_]+/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase());
   const urlIn = text => (text || '').match(/https?:\/\/\S+/)?.[0];
