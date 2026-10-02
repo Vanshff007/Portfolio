@@ -61,6 +61,20 @@
   </article>
 </div>
 
+<!-- Heatmap games -->
+<div class="game-overlay" id="gameOverlay" aria-hidden="true">
+  <div class="game-box" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+    <header class="game-head">
+      <h2 id="gameTitle">Game</h2>
+      <div class="game-hud"><span>score <b id="gameScore">0</b></span><span>lives <b id="gameLives">♥♥♥</b></span><span>best <b id="gameBest">0</b></span></div>
+      <button class="modal-close" id="gameClose" aria-label="Close game">✕</button>
+    </header>
+    <div class="game-stage" id="gameStage"><canvas id="gameCanvas" tabindex="0" aria-label="Game"></canvas><div class="game-msg" id="gameMsg" hidden></div></div>
+    <p class="game-hint" id="gameHint"></p>
+    <div class="game-pad" id="gamePad"></div>
+  </div>
+</div>
+
 <!-- Live demo preview that follows the cursor over project cards -->
 <div class="card-preview" id="cardPreview" aria-hidden="true"><img alt="" id="cardPreviewImg"><span id="cardPreviewLabel"></span></div>
 
@@ -209,7 +223,7 @@
     <div class="panel panel-wide reveal" id="ghPanel">
       <div class="panel-head"><span class="panel-title">GitHub</span><a class="panel-link" href="https://github.com/Vanshff007" target="_blank" rel="noopener noreferrer">@Vanshff007 ↗</a></div>
       <div class="heatmap-wrap"><div class="heatmap" id="heatmap" role="img" aria-label="GitHub contributions in the last year"></div></div>
-      <div class="heatmap-foot"><span id="heatTotal">Loading contributions…</span><span class="heat-legend">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</span></div>
+      <div class="heatmap-foot"><span id="heatTotal">Loading contributions…</span><span class="heat-legend">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</span><button class="heat-play" data-play="pacman">▶ Play Pac-Man on this graph</button></div>
       <div class="gh-split">
         <div><div class="panel-sub">Top languages</div><div class="lang-bar" id="langBar"></div><ul class="lang-list" id="langList"></ul></div>
         <div><div class="panel-sub">Latest commits</div><ul class="commit-list" id="commitList"><li class="muted">Loading…</li></ul></div>
@@ -242,7 +256,7 @@
       <div class="lc-right">
         <div class="panel-sub">Submissions in the last year</div>
         <div class="heatmap-wrap"><div class="heatmap lc-heat" id="lcHeatmap" role="img" aria-label="LeetCode submissions in the last year"></div></div>
-        <div class="heatmap-foot"><span id="lcHeatTotal">Loading submissions…</span><span class="heat-legend lc-heat">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</span></div>
+        <div class="heatmap-foot"><span id="lcHeatTotal">Loading submissions…</span><span class="heat-legend lc-heat">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</span><button class="heat-play lc" data-play="shooter">▶ Play Space Shooter on this graph</button></div>
       </div>
       </div>
     </div>
@@ -378,6 +392,7 @@
 <script src="js/games.js" defer></script>
 <script src="js/widgets.js" defer></script>
 <script src="js/skills-graph.js" defer></script>
+<script src="js/heatmap-games.js" defer></script>
 <script src="js/chat.js" defer></script>
 </body>
 </html>

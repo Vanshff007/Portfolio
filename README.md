@@ -20,7 +20,8 @@ An education, work and achievements timeline. The line draws itself as you scrol
 
 ### Activity
 - **GitHub:** contribution heatmap for the last year, streak, top languages and the latest commits.
-- **LeetCode:** solved count with an Easy / Medium / Hard ring, contest rating, top percentage and streak.
+- **LeetCode:** solved count with an Easy / Medium / Hard ring, contest rating, top percentage, max streak and a submission heatmap for the last year.
+- **Play the graphs:** click the GitHub heatmap to play **Pac-Man** on it (contributions are pellets, the brightest ones are power pellets). Click the LeetCode heatmap to play a **Space Shooter** where each submission is an enemy block (brighter blocks take more hits). Keyboard and touch controls; best scores are saved.
 - **Currently:** what I'm building, learning and reading, plus Spotify "now playing" when the server is set up.
 
 ### Skills
@@ -49,6 +50,7 @@ Visitor counter (abacus) and a guestbook powered by [giscus](https://giscus.app)
 | `resume` | Download my resume |
 | `theme <name>` | Switch theme |
 | `snake`, `typing` | Play snake or take a typing speed test (best scores are saved) |
+| `pacman`, `shooter` | Play Pac-Man on my GitHub graph or the Space Shooter on my LeetCode graph |
 | `sound on/off` | Toggle sound effects |
 | `sudo hire-vansh` | Try it |
 | `email`, `goto <section>`, `history`, `clear`, `exit` | The usual |
@@ -82,6 +84,7 @@ js/projects.js      GitHub projects, case-study modal, hover preview
 js/ui.js            Themes, sound, command palette, Konami code, confetti
 js/terminal.js      Terminal and fake filesystem
 js/games.js         Snake and typing test
+js/heatmap-games.js Pac-Man and Space Shooter played on the heatmaps
 js/widgets.js       GitHub, LeetCode, "currently", Dev.to, visitor counter, giscus, Lighthouse badge
 js/skills-graph.js  Skills graph
 js/chat.js          AI chat window

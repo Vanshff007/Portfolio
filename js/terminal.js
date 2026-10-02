@@ -88,6 +88,7 @@ Run <span class="hl">open ${i + 1}</span> to launch, or <span class="hl">case ${
   <span class="hl">resume</span>        download my resume   <span class="hl">email</span>  copy my email
 ${SITE.apiBase ? '  <span class="hl">ask</span> &lt;question&gt; ask the AI about me\n' : ''}<span class="hl2">fun</span>
   <span class="hl">snake</span>         play snake            <span class="hl">typing</span>  typing speed test
+  <span class="hl">pacman</span>        Pac-Man on my GitHub graph   <span class="hl">shooter</span>  shoot my LeetCode graph
   <span class="hl">theme</span> [name]  ${THEMES.join(' | ')}
   <span class="hl">sound</span> on|off  <span class="hl">sudo hire-vansh</span>   <span class="hl">whoami</span>, <span class="hl">date</span>, <span class="hl">echo</span>, <span class="hl">history</span>, <span class="hl">clear</span>, <span class="hl">exit</span>`),
     about: () => print(
@@ -242,6 +243,8 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
       close(); window.openChat?.(q);
     },
     snake:  () => window.GAMES?.snake(term),
+    pacman: () => { close(); setTimeout(() => window.playHeatmapGame?.('pacman'), 200); },
+    shooter: () => { close(); setTimeout(() => window.playHeatmapGame?.('shooter'), 200); },
     typing: () => window.GAMES?.typing(term),
     man:    ([c]) => c && COMMANDS[c] ? print(`${esc(c)}: see <span class="hl">help</span> — this shell is too small for man pages.`) : err('What manual page do you want?'),
   };

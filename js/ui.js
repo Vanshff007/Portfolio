@@ -108,6 +108,8 @@ function scrollToSection(id) {
       { group: 'Actions', label: `Sound effects: turn ${soundOn ? 'off' : 'on'}`, hint: '♪', run: () => setSound(!soundOn) },
       { group: 'Actions', label: 'Play Snake', hint: 'in the terminal', run: () => window.openTerminal?.('snake') },
       { group: 'Actions', label: 'Typing speed test', hint: 'in the terminal', run: () => window.openTerminal?.('typing') },
+      { group: 'Actions', label: 'Play Pac-Man on my GitHub graph', hint: 'game', run: () => window.playHeatmapGame?.('pacman') },
+      { group: 'Actions', label: 'Play Space Shooter on my LeetCode graph', hint: 'game', run: () => window.playHeatmapGame?.('shooter') },
       ...THEMES.map(t => ({ group: 'Theme', label: `Theme: ${t}`, hint: t === currentTheme() ? 'current' : '', run: () => setTheme(t) })),
     ].filter(a => !a.when || a.when());
     return [...sections, ...projects, ...actions, ...links];

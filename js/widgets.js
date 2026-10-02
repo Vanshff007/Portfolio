@@ -37,6 +37,7 @@ function getRecentCommits() {
    days: [{ date: 'YYYY-MM-DD', count, level 0-4 }], oldest first. Returns stats. */
 function drawHeatmap(el, days, noun) {
   const offset = new Date(days[0].date + 'T00:00:00').getDay(); // align first column to Sunday
+  el._heat = { days, offset }; // read by the heatmap games
   el.innerHTML = '<i class="pad"></i>'.repeat(offset) + days.map(c =>
     `<i class="l${c.level}" title="${c.count} ${noun}${c.count === 1 ? '' : 's'} on ${new Date(c.date + 'T00:00:00').toDateString()}"></i>`).join('');
   el.parentElement.scrollLeft = el.parentElement.scrollWidth; // newest on the right, visible on phones
