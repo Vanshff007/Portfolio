@@ -1,6 +1,6 @@
 # vansh.dev — Portfolio
 
-Personal portfolio of Vansh Minhas, a full-stack developer and CS student at GGSIPU. Hand-coded in a single `index.html` with plain HTML, CSS and JavaScript. No frameworks and no build step.
+Personal portfolio of Vansh Minhas, a full-stack developer and CS student at USICT (GGSIPU). Hand-coded with plain HTML, CSS and JavaScript. No frameworks and no build step. A small optional Node server adds the AI assistant, live LeetCode stats and Spotify.
 
 **Live:**
 - GitHub Pages: https://vanshff007.github.io/Portfolio/
@@ -8,63 +8,151 @@ Personal portfolio of Vansh Minhas, a full-stack developer and CS student at GGS
 
 ## Features
 
-### Projects loaded live from GitHub
-- The Projects section fetches public repos from the GitHub API on page load, so new repos appear automatically.
-- Each card shows a description, tech stack, main language, stars, last-updated time, a live demo link (when one exists) and a source code link.
-- Demo links come from the repo's website field, a URL in its description, or its GitHub Pages site.
-- Filter buttons switch between All, Full-Stack, AI / ML and Frontend.
-- Results are cached in the visitor's browser for 1 hour to stay within GitHub's unauthenticated rate limit (60 requests per hour per IP).
-- Loading skeletons show while data loads. If GitHub is unreachable, static fallback cards are shown instead.
-- Demos hosted on Render's free tier open through a "waking up server" screen, because the server sleeps when idle.
+### Projects
+- Loaded live from the GitHub API, so new repos appear automatically. Cached for 1 hour in the browser to stay within GitHub's rate limit (60 requests per hour per IP).
+- Filters for All, Full-Stack, AI / ML and Frontend.
+- **Case-study modal:** click a card (or "Case study") to see the problem, an architecture diagram, challenges, outcome, a screenshot and links.
+- **Hover preview:** a screenshot of the live demo follows the cursor over each card (via microlink.io; GitHub's social preview image as fallback).
+- Demos on Render's free tier open through a "waking up server" screen.
 
-### Interactive terminal
-Press `Ctrl + K`, the `` ` `` key, or the `>_` button in the nav to open a shell-style terminal.
+### Journey
+An education, work and achievements timeline. The line draws itself as you scroll.
+
+### Activity
+- **GitHub:** contribution heatmap for the last year, streak, top languages and the latest commits.
+- **LeetCode:** solved count with an Easy / Medium / Hard ring, contest rating, top percentage and streak.
+- **Currently:** what I'm building, learning and reading, plus Spotify "now playing" when the server is set up.
+
+### Skills
+Switch between **Bars** and an interactive **Graph**. The graph links each skill to the projects that use it. Click a skill to highlight its projects, click a project to open its case study, and drag nodes around. Clicking a skill row in the bar view also filters the Projects section.
+
+### Writing
+Latest Dev.to posts. The section stays hidden until `SITE.devtoUser` is set.
+
+### Guestbook
+Visitor counter (abacus) and a guestbook powered by [giscus](https://giscus.app), which stores messages as GitHub Discussions.
+
+### AI assistant
+"Ask about me" chat that answers questions from my resume and projects. It uses the Gemini API through the Node server in `server/`, so the API key never reaches the browser. Also available as `ask <question>` in the terminal.
+
+### Terminal (`Ctrl + K` or `` ` ``)
 
 | Command | What it does |
 |---|---|
 | `help` | List all commands |
-| `about`, `skills`, `contact` | Print info about me |
-| `projects` | List projects (synced from GitHub) |
-| `open <n>` | Open project number `n` |
-| `open github` / `linkedin` / `leetcode` | Open a profile |
-| `email` | Copy my email address |
-| `goto <section>` | Scroll to a section |
-| `clear`, `exit` | Clear or close the terminal |
+| `ls`, `cd`, `cat`, `pwd`, `tree` | Browse a small fake filesystem (`about.txt`, `projects/`, `skills.json`, `journey.log`, …) |
+| `about`, `skills`, `contact`, `projects` | Print info |
+| `open <n>` / `open github` | Open a project or profile |
+| `case <n>` | Open a project's case study |
+| `git log` | My latest real commits from GitHub |
+| `neofetch` | System info, portfolio style |
+| `resume` | Download my resume |
+| `theme <name>` | Switch theme |
+| `snake`, `typing` | Play snake or take a typing speed test (best scores are saved) |
+| `sound on/off` | Toggle sound effects |
+| `sudo hire-vansh` | Try it |
+| `email`, `goto <section>`, `history`, `clear`, `exit` | The usual |
 
-Supports command history (arrow keys) and Tab completion.
+Supports command history (arrow keys) and Tab completion for commands and file names.
 
-### Visual effects
-- Particle network in the hero that reacts to the mouse.
-- Typing headline that cycles through Builds., Ships., Solves., Creates. and Debugs.
-- 3D tilt and cursor-following glow on project cards.
-- Buttons that drift toward the cursor.
-- Scrambled-text reveal on section titles and count-up stats.
-- Custom cursor, scroll progress bar, active nav link highlighting and a back-to-top button.
+### Command palette (`Ctrl + P`)
+Fuzzy search across sections, projects, links, themes and actions (download resume, copy email, open terminal, play snake, …).
 
-### Accessibility and responsiveness
-- Responsive layout with a hamburger menu on small screens.
-- Native cursor on touch devices.
-- Respects the `prefers-reduced-motion` setting.
+### Themes
+Dark (default), Light, Dracula, Matrix and Sunset. Use the ◐ button in the nav, the palette or `theme <name>`. The choice is saved.
 
-### Contact
-- Contact form powered by [Formspree](https://formspree.io), with validation and success/error messages.
-- Links to Gmail, GitHub, LinkedIn and LeetCode. Clicking the Gmail button also copies the address.
+### Extras
+- Sound effects made with the Web Audio API, off by default (♪ button in the footer).
+- Konami code (↑ ↑ ↓ ↓ ← → ← → B A) for confetti and a "dev mode" that outlines the layout grid.
+- Resume button in the hero, with download tracking.
+- Lighthouse score badge in the footer.
+- Particle network hero, typing headline, 3D tilt cards, magnetic buttons, scramble text, custom cursor, scroll progress.
+- Responsive, keyboard friendly and respects `prefers-reduced-motion`.
 
-## Customizing the projects list
+## Project structure
 
-The projects config lives in the `<script>` block of `index.html`:
+```
+index.html          Page markup
+css/style.css       Base styles and layout
+css/features.css    Themes and styles for the newer features
+js/config.js        All editable content: links, projects, timeline, skills, feature switches
+js/render.js        Shared helpers; builds skill bars and the timeline from config
+js/core.js          Cursor, scroll effects, hero canvas, contact form
+js/projects.js      GitHub projects, case-study modal, hover preview
+js/ui.js            Themes, sound, command palette, Konami code, confetti
+js/terminal.js      Terminal and fake filesystem
+js/games.js         Snake and typing test
+js/widgets.js       GitHub, LeetCode, "currently", Dev.to, visitor counter, giscus, Lighthouse badge
+js/skills-graph.js  Skills graph
+js/chat.js          AI chat window
+assets/             Resume PDF and favicon
+server/             Optional Node API (AI chat, LeetCode, Spotify)
+```
 
-- `GH_USER`: the GitHub username to load repos from.
-- `GH_EXCLUDE`: repos to hide.
-- `PROJECT_INFO`: curated title, description, category and tech stack for each repo. The GitHub API only reports languages, not frameworks, so this fills the gap. Repos without an entry use their GitHub description and languages.
-- `FEATURED_ORDER`: the display order. The first three are labeled "Featured".
+## Configuration
 
-After changing the config, bump `CACHE_KEY` (for example, `gh-projects-v2` to `gh-projects-v3`) so returning visitors get the new list right away.
+Everything you would normally edit is in `js/config.js`:
+
+- `SITE.apiBase`: URL of the deployed server, for example `https://vansh-portfolio-api.onrender.com`. Empty hides the AI chat and Spotify, and LeetCode stats come from a public fallback API (which rate-limits, so the card may show the saved numbers in `SITE.leetcodeFallback`).
+- `SITE.devtoUser`: your Dev.to username, to show the Writing section.
+- `SITE.giscus`: guestbook settings (see below).
+- `SITE.now`: the "Currently" lines.
+- `SITE.lighthouse`: the scores shown in the footer badge.
+- `TIMELINE`, `SKILL_GROUPS`: the Journey and Skills content.
+- `GH_USER`, `GH_EXCLUDE`, `PROJECT_INFO`, `FEATURED_ORDER`: the projects list and case studies. `PROJECT_INFO` adds curated titles, stacks and case-study text (`problem`, `arch`, `challenges`, `outcome`), since the GitHub API only reports languages.
+
+After changing the projects config, bump `CACHE_KEY` in `js/projects.js` (for example `gh-projects-v3` to `gh-projects-v4`) so returning visitors get the new list right away.
+
+### Guestbook setup (once)
+1. In the repo on GitHub, open **Settings → General → Features** and enable **Discussions**.
+2. Create a discussion category named `Guestbook` (type: Announcement works well, so only giscus can create the thread).
+3. Install the [giscus app](https://github.com/apps/giscus) on the repo.
+4. Open https://giscus.app, enter `Vanshff007/Portfolio`, choose the `Guestbook` category, and copy `data-repo-id` and `data-category-id` into `SITE.giscus` in `js/config.js`.
+
+## Server (AI chat, LeetCode, Spotify)
+
+The server lives in `server/`. It needs Node 20 or newer.
+
+```bash
+cd server
+npm install
+cp .env.example .env   # then fill in GEMINI_API_KEY
+npm run dev            # http://localhost:3000
+```
+
+Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /api/health`. The chat uses `gemini-flash-latest` (override with `GEMINI_MODEL`) and answers only from `server/profile.md`; edit that file to change what the assistant knows. CORS is limited to `ALLOWED_ORIGINS`, and the chat is rate limited to 20 questions per 10 minutes per IP.
+
+### Deploy on Render
+1. **New → Web Service**, connect this repo, and set **Root Directory** to `server`.
+2. Build command `npm install`, start command `npm start`.
+3. Add the environment variables from `.env.example` (at least `GEMINI_API_KEY`).
+4. Put the service URL in `SITE.apiBase` in `js/config.js`.
+
+The free tier sleeps when idle; the chat window pings `/api/health` when opened so the server starts waking up early.
+
+### Spotify (optional)
+1. Create an app at https://developer.spotify.com/dashboard and add the redirect URI `http://127.0.0.1:8888/callback`.
+2. Open this URL in your browser (replace `CLIENT_ID`) and approve:
+   `https://accounts.spotify.com/authorize?client_id=CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A8888%2Fcallback&scope=user-read-currently-playing%20user-read-recently-played`
+3. Copy the `code` from the redirect URL and exchange it for a refresh token:
+   ```bash
+   curl -X POST https://accounts.spotify.com/api/token \
+     -u CLIENT_ID:CLIENT_SECRET \
+     -d grant_type=authorization_code -d code=THE_CODE \
+     -d redirect_uri=http://127.0.0.1:8888/callback
+   ```
+4. Set `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN` on the server.
 
 ## Running locally
 
-Open `index.html` in a browser. Nothing to install.
+Serve the folder with any static server (some features use `fetch`, which needs `http://` rather than `file://`):
+
+```bash
+python -m http.server 5500
+```
+
+Then open http://localhost:5500.
 
 ## Tech
 
-HTML, CSS, vanilla JavaScript, Canvas API, GitHub REST API, Formspree.
+HTML, CSS, vanilla JavaScript, Canvas API, Web Audio API, GitHub REST API, LeetCode GraphQL, Dev.to API, giscus, Formspree, Node.js, Express, Gemini API.
