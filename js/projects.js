@@ -194,7 +194,12 @@ let PROJECTS = [];
     current = card;
     const p = PROJECTS.find(x => x.name === card.dataset.name);
     if (!p) return;
-    img.onerror = () => { img.onerror = null; img.src = ogURL(p); };
+    // Fall back to the GitHub card once, then hide the image (GitHub rate-limits it with 429s)
+    img.hidden = false;
+    img.onerror = () => {
+      if (img.src !== ogURL(p)) img.src = ogURL(p);
+      else { img.onerror = null; img.hidden = true; }
+    };
     img.src = shotURL(p);
     label.textContent = p.demo ? (isRender(p.demo) ? 'Live on Render (may need to wake up)' : 'Live demo preview') : 'Code only, no live demo';
     prev.classList.add('show');

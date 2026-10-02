@@ -13,14 +13,19 @@ document.addEventListener('themechange', readThemeRGB);
 /* ── Custom cursor ── */
 const cursor = document.getElementById('cursor');
 const ring   = document.getElementById('cursorRing');
-let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-(function animCursor() {
-  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+let mx = 0, my = 0, rx = 0, ry = 0, cursorRaf = 0;
+// Move with `translate` (no layout) and only animate while the ring is catching up,
+// so touch devices (cursor hidden) and an idle mouse cost nothing per frame
+function animCursor() {
+  cursor.style.translate = `${mx}px ${my}px`;
   rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-  requestAnimationFrame(animCursor);
-})();
+  ring.style.translate = `${rx}px ${ry}px`;
+  cursorRaf = Math.abs(mx - rx) + Math.abs(my - ry) > 0.5 ? requestAnimationFrame(animCursor) : 0;
+}
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  if (!cursorRaf) cursorRaf = requestAnimationFrame(animCursor);
+});
 // Event delegation so elements added later (terminal, toasts) also get the hover state
 const HOVER_SEL = 'a, button, input, textarea, .project-card, .skill-item, .tag';
 document.addEventListener('mouseover', e => {
@@ -229,6 +234,8 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
   const hero   = document.getElementById('hero');
   const ctx    = canvas.getContext('2d');
   let W, H, dpr, pts = [], running = true;
+  // Touch screens get one still frame: no cursor to react to, and it saves battery
+  const still = reduceMotion || !finePointer;
   const mouse = { x: -9999, y: -9999 };
 
   function resize() {
@@ -246,7 +253,7 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
   function draw() {
     ctx.clearRect(0, 0, W, H);
     for (const p of pts) {
-      if (!reduceMotion) {
+      if (!still) {
         // gentle push away from the cursor
         const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
         if (d2 < 14000) { const f = 0.6 / Math.sqrt(d2 + 1); p.vx += dx * f * 0.05; p.vy += dy * f * 0.05; }
@@ -274,7 +281,7 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
         ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
       }
     }
-    if (running && !reduceMotion) requestAnimationFrame(draw);
+    if (running && !still) requestAnimationFrame(draw);
   }
 
   hero.addEventListener('mousemove', e => {
@@ -284,10 +291,14 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
   hero.addEventListener('mouseleave', () => { mouse.x = mouse.y = -9999; });
   new IntersectionObserver(([e]) => {
     const was = running; running = e.isIntersecting;
-    if (running && !was) requestAnimationFrame(draw);
+    if (running && !was && pts.length) requestAnimationFrame(draw);
   }).observe(hero);
-  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); if (reduceMotion) draw(); }, 150); });
-  resize(); draw();
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); if (still) draw(); }, 150); });
+  // Start once the page has loaded and the main thread is idle, so the
+  // particles don't compete with the hero text for first paint
+  const start = () => { resize(); draw(); };
+  const whenIdle = () => (window.requestIdleCallback || setTimeout)(start, { timeout: 1500 });
+  if (document.readyState === 'complete') whenIdle(); else addEventListener('load', whenIdle, { once: true });
 })();
 
 /* ── Project card tilt + spotlight ── */

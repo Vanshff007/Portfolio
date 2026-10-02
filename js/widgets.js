@@ -5,7 +5,8 @@ async function cachedJSON(key, url, ttlMs, opts) {
   const hit = store.get(key);
   if (hit && Date.now() - hit.t < ttlMs) return hit.data;
   try {
-    const res = await fetch(url, opts);
+    // Give up on a hung API so the card shows its fallback instead of "Loading…" forever
+    const res = await fetch(url, { signal: AbortSignal.timeout?.(20000), ...opts });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     store.set(key, { t: Date.now(), data });
@@ -312,10 +313,12 @@ whenNear('activity', function () {
 (function () {
   let counted = false;
   try { counted = sessionStorage.getItem('visit-counted') === '1'; } catch {}
-  const url = `https://abacus.jasoncameron.dev/${counted ? 'get' : 'hit'}/${SITE.counterNamespace}/visits`;
-  fetch(url).then(r => r.json()).then(d => {
+  // Local dev, Lighthouse and headless browsers only read the count, so test runs don't inflate it
+  const isTest = ['localhost', '127.0.0.1'].includes(location.hostname) || /Lighthouse|HeadlessChrome/.test(navigator.userAgent) || navigator.webdriver;
+  const url = `https://abacus.jasoncameron.dev/${counted || isTest ? 'get' : 'hit'}/${SITE.counterNamespace}/visits`;
+  fetch(url, { cache: 'no-store' }).then(r => r.json()).then(d => {
     if (typeof d.value !== 'number') return;
-    try { sessionStorage.setItem('visit-counted', '1'); } catch {}
+    if (!isTest) try { sessionStorage.setItem('visit-counted', '1'); } catch {}
     window.VISITS = d.value.toLocaleString();
     document.getElementById('footVisits').textContent = `${window.VISITS} visits`;
     const el = document.getElementById('visitNum');
