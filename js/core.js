@@ -109,9 +109,12 @@ document.querySelectorAll('.skill-bar').forEach(b => sbObs.observe(b));
 ────────────────────────────────────────────────────────────────── */
 const WAKE_MS = 8000;
 let wakeTimer = null;
+let wakeTab = null;
 
 function closeWakeOverlay() {
   if (wakeTimer) { clearInterval(wakeTimer); wakeTimer = null; }
+  if (wakeTab && !wakeTab.closed) wakeTab.close();
+  wakeTab = null;
   document.getElementById('wakeOverlay').classList.remove('active');
   document.getElementById('wakeBar').style.width = '0%';
   document.getElementById('wakeMsg').textContent = 'Waking up server…';
@@ -121,6 +124,17 @@ function launchRender(targetUrl, pingUrl) {
   const overlay = document.getElementById('wakeOverlay');
   const bar     = document.getElementById('wakeBar');
   const msg     = document.getElementById('wakeMsg');
+
+  // Open the tab now, while the click still counts as a user gesture.
+  // Opening it after the wait gets blocked as a popup.
+  if (wakeTab && !wakeTab.closed) wakeTab.close();
+  wakeTab = window.open('about:blank', '_blank');
+  if (wakeTab) {
+    wakeTab.opener = null;
+    wakeTab.document.title = 'Waking up server…';
+    wakeTab.document.body.style.cssText = 'margin:0;display:grid;place-items:center;height:100vh;font:16px system-ui,sans-serif;background:#111;color:#ddd';
+    wakeTab.document.body.textContent = 'Waking up server… the demo opens in a few seconds.';
+  }
 
   overlay.classList.add('active');
   bar.style.width = '0%';
@@ -143,7 +157,13 @@ function launchRender(targetUrl, pingUrl) {
       clearInterval(wakeTimer); wakeTimer = null;
       bar.style.width = '100%';
       setTimeout(() => {
-        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        if (wakeTab && !wakeTab.closed) {
+          wakeTab.location.href = targetUrl;
+          wakeTab.focus();
+        } else {
+          location.href = targetUrl;
+        }
+        wakeTab = null;
         closeWakeOverlay();
       }, 300);
     }
