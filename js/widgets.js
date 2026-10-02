@@ -164,9 +164,9 @@ whenNear('activity', function () {
 
 /* ── Spotify player ──────────────────────────────────────────────
    Songs come from my public playlist (server /api/playlist), played through
-   Spotify's official embed. It tries to start as soon as the page has loaded;
-   most browsers block sound until the visitor interacts, so if that is blocked
-   it starts on their first click, tap or key press anywhere on the page.
+   Spotify's official embed. Browsers block sound until the visitor interacts,
+   so the embed loads and starts on their first click, tap or key press anywhere
+   on the page (loading it only then also keeps Spotify's cookies off page load).
    SITE.firstSong plays first, then the rest in random order. The embed lives in a
    floating mini player (Spotify only loads embeds that are on screen), so it
    can be paused from anywhere; if the visitor pauses or closes it, it won't
@@ -226,6 +226,7 @@ whenNear('activity', function () {
     embedLoading = embedLoading || loadEmbedAPI().then(api => new Promise(resolve => {
       api.createController(document.getElementById('plEmbed'), { uri: current.uri, width: '100%', height: 80 }, c => {
         controller = c;
+        mini.querySelector('iframe')?.setAttribute('title', 'Spotify player');
         c.addListener('ready', () => { if (wantPlay) { wantPlay = false; c.play(); } });
         c.addListener('playback_update', e => {
           const { isPaused, isBuffering, position, duration } = e.data;
@@ -296,12 +297,7 @@ whenNear('activity', function () {
     });
 
     if (isOff()) return;
-    // 1) Try right after the page has loaded (kept off the critical path). Works where
-    //    the browser allows autoplay with sound for this site.
-    const tryNow = () => { if (!isOff() && !controller) playTrack(current); };
-    if (document.readyState === 'complete') setTimeout(tryNow, 1500);
-    else addEventListener('load', () => setTimeout(tryNow, 1500), { once: true });
-    // 2) Otherwise start on the visitor's first interaction, which browsers do allow
+    // Start on the visitor's first interaction, which browsers allow to play sound
     const start = e => {
       if (e.target.closest?.('#miniPlayer, #spotify')) return; // those controls handle it themselves
       ['pointerdown', 'keydown'].forEach(t => removeEventListener(t, start, true));
@@ -310,29 +306,6 @@ whenNear('activity', function () {
     };
     ['pointerdown', 'keydown'].forEach(t => addEventListener(t, start, true));
   }).catch(() => { box.hidden = true; });
-})();
-
-/* ── Writing: latest Dev.to posts ── */
-(function () {
-  if (!SITE.devtoUser) return;
-  const section = document.getElementById('writing');
-  cachedJSON('devto-v1', `https://dev.to/api/articles?username=${encodeURIComponent(SITE.devtoUser)}&per_page=6`, 3 * 3600 * 1000)
-    .then(posts => {
-      if (!posts.length) return;
-      document.getElementById('postsGrid').innerHTML = posts.map((p, i) => `
-        <a class="post-card reveal" style="transition-delay:${i * 0.08}s" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">
-          <div class="post-meta">${esc(p.readable_publish_date)} · ${p.reading_time_minutes} min read</div>
-          <h3 class="post-title">${esc(p.title)}</h3>
-          <p class="post-desc">${esc(p.description)}</p>
-          <div class="post-foot"><span>${p.tag_list.slice(0, 3).map(t => '#' + esc(t)).join(' ')}</span><span>♥ ${p.public_reactions_count} · 💬 ${p.comments_count}</span></div>
-        </a>`).join('');
-      section.hidden = false;
-      observeReveal(section);
-      if (!document.querySelector('#navLinks a[href="#writing"]')) {
-        document.querySelector('#navLinks a[href="#skills"]').parentElement.insertAdjacentHTML('afterend', '<li><a href="#writing">Writing</a></li>');
-      }
-    })
-    .catch(() => {});
 })();
 
 /* ── Visitor counter (counts once per browser session) ── */

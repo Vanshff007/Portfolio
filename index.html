@@ -79,7 +79,7 @@
 <div class="card-preview" id="cardPreview" aria-hidden="true"><img alt="" id="cardPreviewImg"><span id="cardPreviewLabel"></span></div>
 
 <!-- AI chat -->
-<button class="chat-fab" id="chatFab" hidden><span aria-hidden="true">✦</span><span class="chat-fab-label">Ask about me</span></button>
+<button class="chat-fab" id="chatFab" aria-label="Ask about me" hidden><span aria-hidden="true">✦</span><span class="chat-fab-label">Ask about me</span></button>
 <section class="chat-panel" id="chatPanel" aria-label="Ask about Vansh" hidden>
   <header class="chat-head"><span><b>vansh.ai</b> · answers from my resume</span><button id="chatClose" aria-label="Close chat">✕</button></header>
   <div class="chat-log" id="chatLog" aria-live="polite"></div>
@@ -296,15 +296,6 @@
     <canvas id="skillsGraph" aria-label="Interactive graph of skills and the projects that use them"></canvas>
     <div class="graph-info" id="graphInfo">Click a skill node. Drag to move nodes.</div>
   </div>
-</section>
-
-<section id="writing" hidden>
-  <div class="section-header reveal">
-    <span class="section-num"></span>
-    <h2 class="section-title">Writing</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="posts-grid" id="postsGrid"></div>
 </section>
 
 <section id="guestbook">

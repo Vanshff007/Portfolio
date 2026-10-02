@@ -27,9 +27,6 @@ An education, work and achievements timeline. The line draws itself as you scrol
 ### Skills
 Switch between **Bars** and an interactive **Graph**. The graph links each skill to the projects that use it. Click a skill to highlight its projects, click a project to open its case study, and drag nodes around. Clicking a skill row in the bar view also filters the Projects section.
 
-### Writing
-Latest Dev.to posts. The section stays hidden until `SITE.devtoUser` is set.
-
 ### Guestbook
 Visitor counter (abacus) and a guestbook powered by [giscus](https://giscus.app), which stores messages as GitHub Discussions.
 
@@ -97,7 +94,6 @@ server/             Optional Node API (AI chat, LeetCode, Spotify)
 Everything you would normally edit is in `js/config.js`:
 
 - `SITE.apiBase`: URL of the deployed server, for example `https://vansh-portfolio-api.onrender.com`. Empty hides the AI chat and Spotify, and LeetCode stats come from a public fallback API (which rate-limits, so the card may show the saved numbers in `SITE.leetcodeFallback`).
-- `SITE.devtoUser`: your Dev.to username, to show the Writing section.
 - `SITE.giscus`: guestbook settings (see below).
 - `SITE.now`: the "Currently" lines.
 - `SITE.lighthouse`: the scores shown in the footer badge.
@@ -133,7 +129,7 @@ Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/playlist`, `GET /api
 The free tier sleeps when idle; the chat window pings `/api/health` when opened so the server starts waking up early.
 
 ### Spotify playlist (optional)
-A floating mini player (bottom left) plays a public Spotify playlist: `SITE.firstSong` first, then the rest in random order. It starts on its own where the browser allows autoplay, otherwise on the visitor's first click, tap or key press. Visitors can skip (⏭) or close it, and the "Currently" panel has Play/Pause and Next buttons too. Songs added to the playlist show up within about 10 minutes.
+A floating mini player (bottom left) plays a public Spotify playlist: `SITE.firstSong` first, then the rest in random order. It loads and starts on the visitor's first click, tap or key press anywhere on the page. Visitors can skip (⏭) or close it, and the "Currently" panel has Play/Pause and Next buttons too. Songs added to the playlist show up within about 10 minutes.
 
 1. Create an app at https://developer.spotify.com/dashboard. Under **Redirect URIs** add `http://127.0.0.1:8888/callback`, and tick **Web API**.
 2. Put the app's `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `server/.env`.
@@ -155,7 +151,7 @@ Then open http://localhost:5500.
 
 ## Tech
 
-HTML, CSS, vanilla JavaScript, Canvas API, Web Audio API, GitHub REST API, LeetCode GraphQL, Dev.to API, giscus, Formspree, Node.js, Express, Gemini API.
+HTML, CSS, vanilla JavaScript, Canvas API, Web Audio API, GitHub REST API, LeetCode GraphQL, giscus, Formspree, Node.js, Express, Gemini API.
 
 ## License
 

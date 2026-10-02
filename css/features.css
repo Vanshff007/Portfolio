@@ -195,16 +195,6 @@ a.now-v:hover{color:var(--accent);}
 .graph-show{margin-left:0.6rem;background:none;border:1px solid rgba(var(--accent-rgb),0.4);color:var(--accent);font-family:inherit;font-size:0.65rem;padding:0.25rem 0.6rem;cursor:inherit;}
 .graph-show:hover{background:var(--accent);color:var(--on-accent);}
 
-/* ════════ Writing ════════ */
-#writing{background:var(--bg);}
-.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:1.5rem;}
-.post-card{display:flex;flex-direction:column;gap:0.7rem;padding:1.6rem;background:var(--surface);border:1px solid var(--border);text-decoration:none;color:var(--text);cursor:inherit;transition:all 0.3s;}
-.post-card:hover{border-color:rgba(var(--accent-rgb),0.35);transform:translateY(-4px);}
-.post-meta,.post-foot{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;}
-.post-foot{display:flex;justify-content:space-between;margin-top:auto;}
-.post-title{font-family:'Syne',sans-serif;font-size:1.1rem;line-height:1.3;}
-.post-desc{font-size:0.75rem;color:var(--muted);line-height:1.7;}
-
 /* ════════ Guestbook ════════ */
 #guestbook{background:var(--surface);}
 .guestbook-grid{display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;}
@@ -274,7 +264,7 @@ body.dev-mode::after{content:'DEV MODE · ↑↑↓↓←→←→BA to exit';po
 
 /* ════════ Touch + small screens ════════ */
 @media (hover:none),(pointer:coarse){
-  .icon-btn,.palette-item,.modal-close,.chat-fab,.chat-form button,.chat-suggest button,.chat-head button,.graph-show,.post-card,.commit-list a,.panel-link,.lh-badge,.project-card{cursor:auto;}
+  .icon-btn,.palette-item,.modal-close,.chat-fab,.chat-form button,.chat-suggest button,.chat-head button,.graph-show,.commit-list a,.panel-link,.lh-badge,.project-card{cursor:auto;}
   .card-preview{display:none;}
 }
 @media (max-width:900px){

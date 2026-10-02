@@ -24,9 +24,6 @@ const SITE = {
   // The Spotify player always starts with this song (title from the playlist), then shuffles.
   firstSong: 'No One Noticed',
 
-  // Dev.to username for the Writing section. Empty = section hidden.
-  devtoUser: '',
-
   // Giscus guestbook (https://giscus.app). Fill in repoId and categoryId
   // from the giscus.app setup page. Empty = guestbook shows a setup note.
   giscus: {
