@@ -48,20 +48,20 @@ const SITE = {
   lighthouse: { performance: 86, accessibility: 100, bestPractices: 100, seo: 100 },
 };
 
-/* ── Journey timeline (newest first) ── */
+/* ── Journey timeline (oldest first, read top to bottom) ── */
 const TIMELINE = [
-  { when: '2025 – 2026', title: 'Executive Member, ACM-ICPC Club USICT', kind: 'Leadership',
-    text: 'Mentored first-year students in DSA bootcamps, teaching graph traversal (BFS, DFS) with live coding. Helped run coding and competitive programming events.' },
-  { when: 'Jul – Sep 2025', title: 'MERN Stack Web Development Intern, Coding Samurai', kind: 'Work',
-    text: 'Built a real-time chat app and a blogging platform with Next.js and Express.js. Implemented REST APIs, secure authentication and database integration, and handled debugging and deployment on Vercel.' },
-  { when: '2025', title: 'Hackathons and contests', kind: 'Achievement',
-    text: '3rd place at the Hack-O-Knight Hackathon. Rank 2463 in the Amazon ML Challenge. Rank 1073 in CodeChef Starters 234. Participated in Zomathon 2026.' },
-  { when: 'Ongoing', title: '505+ LeetCode problems, 1743 contest rating', kind: 'Achievement',
-    text: 'Consistent problem solving across arrays, graphs, DP and greedy. Top 11% in LeetCode contests.' },
-  { when: '2023 – 2027', title: 'B.Tech Computer Science, USICT (GGSIPU)', kind: 'Education',
-    text: 'University School of Information, Communication and Technology, New Delhi. CGPA 7.8.' },
   { when: '2021 – 2023', title: 'Class XII (CBSE), Delhi Public School Ranipur', kind: 'Education',
     text: 'Senior secondary education in Haridwar. Scored 90.8%.' },
+  { when: '2023 – 2027', title: 'B.Tech Computer Science, USICT (GGSIPU)', kind: 'Education',
+    text: 'University School of Information, Communication and Technology, New Delhi. CGPA 7.8.' },
+  { when: 'Ongoing', title: '505+ LeetCode problems, 1743 contest rating', kind: 'Achievement',
+    text: 'Consistent problem solving across arrays, graphs, DP and greedy. Top 11% in LeetCode contests.' },
+  { when: '2025', title: 'Hackathons and contests', kind: 'Achievement',
+    text: '3rd place at the Hack-O-Knight Hackathon. Rank 2463 in the Amazon ML Challenge. Rank 1073 in CodeChef Starters 234. Participated in Zomathon 2026.' },
+  { when: 'Jul – Sep 2025', title: 'MERN Stack Web Development Intern, Coding Samurai', kind: 'Work',
+    text: 'Built a real-time chat app and a blogging platform with Next.js and Express.js. Implemented REST APIs, secure authentication and database integration, and handled debugging and deployment on Vercel.' },
+  { when: '2025 – 2026', title: 'Executive Member, ACM-ICPC Club USICT', kind: 'Leadership',
+    text: 'Mentored first-year students in DSA bootcamps, teaching graph traversal (BFS, DFS) with live coding. Helped run coding and competitive programming events.' },
 ];
 
 /* ── Projects ─────────────────────────────────────────────────────

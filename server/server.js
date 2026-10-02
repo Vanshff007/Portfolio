@@ -1,7 +1,7 @@
 // API behind the portfolio:
 //   POST /api/chat         AI assistant that answers questions about Vansh (Gemini, streamed text)
 //   GET  /api/leetcode     LeetCode stats (LeetCode's GraphQL API blocks browser CORS)
-//   GET  /api/now-playing  Spotify currently / last played track
+//   GET  /api/playlist     songs from my public Spotify playlist (for the shuffle player)
 //   GET  /api/health       wake-up ping for Render's free tier
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -168,48 +168,58 @@ app.get('/api/leetcode', async (req, res) => {
   }
 });
 
-/* ── Spotify now playing ── */
-const spotifyConfigured = () => process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET && process.env.SPOTIFY_REFRESH_TOKEN;
+/* ── Spotify playlist ── */
+// Spotify only lists a playlist's songs to a logged-in user, so this uses my refresh
+// token (get one with `npm run spotify-token`). Values are trimmed because stray
+// spaces are easy to paste into a dashboard.
+const env = k => (process.env[k] || '').trim();
+const PLAYLIST_ID = env('SPOTIFY_PLAYLIST_ID') || '2tTUBBKblopXxly7czjFKv';
+const spotifyConfigured = () => env('SPOTIFY_CLIENT_ID') && env('SPOTIFY_CLIENT_SECRET') && env('SPOTIFY_REFRESH_TOKEN');
 let spotifyToken = null, spotifyTokenExpires = 0;
 async function spotifyAccessToken() {
   if (spotifyToken && Date.now() < spotifyTokenExpires) return spotifyToken;
   const r = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
-      Authorization: 'Basic ' + Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64'),
+      Authorization: 'Basic ' + Buffer.from(`${env('SPOTIFY_CLIENT_ID')}:${env('SPOTIFY_CLIENT_SECRET')}`).toString('base64'),
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: process.env.SPOTIFY_REFRESH_TOKEN }),
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: env('SPOTIFY_REFRESH_TOKEN') }),
   });
-  if (!r.ok) throw new Error('Spotify token HTTP ' + r.status);
+  if (!r.ok) throw new Error('Spotify token HTTP ' + r.status + ' (check SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REFRESH_TOKEN)');
   const d = await r.json();
   spotifyToken = d.access_token;
   spotifyTokenExpires = Date.now() + (d.expires_in - 60) * 1000;
   return spotifyToken;
 }
-const trackInfo = (t, playing) => t && ({
-  playing, title: t.name, artist: t.artists.map(a => a.name).join(', '),
-  url: t.external_urls.spotify, albumArt: t.album.images.at(-1)?.url || null,
-});
-const getNowPlaying = cached(20 * 1000, async () => {
+const getPlaylist = cached(60 * 60 * 1000, async () => {
   const headers = { Authorization: 'Bearer ' + await spotifyAccessToken() };
-  const now = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers });
-  if (now.status === 200) {
-    const d = await now.json();
-    if (d.item && d.currently_playing_type === 'track') return trackInfo(d.item, d.is_playing);
+  const meta = await fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,external_urls,images`, { headers });
+  if (!meta.ok) throw new Error('Spotify playlist HTTP ' + meta.status);
+  const p = await meta.json();
+  // Spotify's newer API lists playlist entries under /items, each with an `item` field
+  const tracks = [];
+  for (let url = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/items?limit=100`; url;) {
+    const r = await fetch(url, { headers });
+    if (!r.ok) throw new Error('Spotify playlist items HTTP ' + r.status);
+    const page = await r.json();
+    for (const entry of page.items) {
+      const t = entry.item || entry.track;
+      if (!t || t.type !== 'track' || t.is_local || t.is_playable === false) continue;
+      tracks.push({ uri: t.uri, title: t.name, artist: t.artists.map(a => a.name).join(', '), url: t.external_urls.spotify, cover: t.album.images.at(-1)?.url || null });
+    }
+    url = page.next;
   }
-  const recent = await fetch('https://api.spotify.com/v1/me/player/recently-played?limit=1', { headers });
-  if (!recent.ok) return {};
-  const d = await recent.json();
-  return trackInfo(d.items?.[0]?.track, false) || {};
+  return { name: p.name, url: p.external_urls.spotify, cover: p.images?.[0]?.url || null, tracks };
 });
-app.get('/api/now-playing', async (req, res) => {
+app.get('/api/playlist', async (req, res) => {
   if (!spotifyConfigured()) return res.json({ configured: false });
   try {
-    res.json({ configured: true, ...(await getNowPlaying()) });
+    res.setHeader('Cache-Control', 'public, max-age=600');
+    res.json({ configured: true, ...(await getPlaylist()) });
   } catch (err) {
     console.error('Spotify error', err.message);
-    res.json({ configured: true });
+    res.status(502).json({ configured: true, error: 'Spotify unavailable' });
   }
 });
 

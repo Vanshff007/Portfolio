@@ -155,31 +155,95 @@ whenNear('activity', function () {
   }
 });
 
-/* ── "Currently" widget + Spotify now playing ── */
+/* ── "Currently" widget ── */
 (function () {
   const icons = { building: '⚒', learning: '◆', reading: '❏', grinding: '⚡' };
   document.getElementById('nowList').innerHTML = Object.entries(SITE.now).map(([k, v]) =>
     `<li><span class="now-k">${icons[k] || '•'} ${esc(k)}</span><span class="now-v">${esc(v)}</span></li>`).join('');
+})();
 
-  const url = apiURL('/api/now-playing');
+/* ── Spotify shuffle player ──────────────────────────────────────
+   Songs come from my public playlist (server /api/playlist). Playback uses
+   Spotify's official embed. Browsers block autoplay with sound, so music
+   starts on the first click of "Shuffle play"; after that, each song that
+   ends moves on to another random one. Logged-out visitors get 30s previews.
+────────────────────────────────────────────────────────────────── */
+whenNear('activity', function () {
+  const url = apiURL('/api/playlist');
   if (!url) return;
   const box = document.getElementById('spotify');
-  async function poll() {
-    try {
-      const r = await fetch(url);
-      const d = await r.json();
-      if (!d.configured) return;
-      box.hidden = false;
-      box.innerHTML = d.title ? `
-        ${d.albumArt ? `<img src="${esc(d.albumArt)}" alt="" width="44" height="44">` : ''}
-        <div><span class="now-k">${d.playing ? '<span class="eq"><i></i><i></i><i></i></span> listening to' : '♫ last played'}</span>
-        <a class="now-v" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.title)}</a>
-        <span class="spot-artist">${esc(d.artist)}</span></div>` : '<span class="now-k">♫ not listening right now</span>';
-      setTimeout(poll, d.playing ? 30000 : 120000);
-    } catch { box.hidden = true; }
+  let tracks = [], queue = [], current = null, controller = null, pendingPlay = false, ended = false;
+
+  // Shuffled order without repeats until every song has played once
+  function nextTrack() {
+    if (!queue.length) {
+      queue = tracks.filter(t => t !== current).sort(() => Math.random() - 0.5);
+      if (!queue.length) queue = tracks.slice();
+    }
+    return queue.shift();
   }
-  poll();
-})();
+  function show(t) {
+    current = t;
+    document.getElementById('plTitle').textContent = t.title;
+    document.getElementById('plArtist').textContent = t.artist;
+  }
+  function playRandom() {
+    const t = nextTrack();
+    show(t);
+    ended = false;
+    if (!controller) return;
+    pendingPlay = true;
+    controller.loadUri(t.uri);
+    // The embed fires "ready" after loading; play then (with a fallback for slow loads)
+    setTimeout(() => { if (pendingPlay) { pendingPlay = false; controller.play(); } }, 1200);
+    document.getElementById('plShuffle').innerHTML = '🔀 Next random';
+  }
+
+  function loadEmbedAPI() {
+    return new Promise(resolve => {
+      if (window.SpotifyIframeApi) return resolve(window.SpotifyIframeApi);
+      window.onSpotifyIframeApiReady = api => { window.SpotifyIframeApi = api; resolve(api); };
+      const s = document.createElement('script');
+      s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+      s.async = true;
+      document.head.appendChild(s);
+    });
+  }
+
+  cachedJSON('spotify-playlist-v1', url, 30 * 60 * 1000).then(async d => {
+    if (!d.configured || !d.tracks?.length) return;
+    tracks = d.tracks;
+    box.hidden = false;
+    box.innerHTML = `
+      <div class="pl-head">
+        ${d.cover ? `<img src="${esc(d.cover)}" alt="" width="52" height="52">` : ''}
+        <div class="pl-meta">
+          <span class="now-k">🎧 my playlist · <a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.name)}</a> · ${tracks.length} songs</span>
+          <span class="now-v" id="plTitle"></span>
+          <span class="spot-artist" id="plArtist"></span>
+        </div>
+        <button class="pl-shuffle" id="plShuffle" type="button">🔀 Shuffle play</button>
+      </div>
+      <div class="pl-embed"><div id="plEmbed"></div></div>`;
+    const first = nextTrack();
+    show(first);
+    document.getElementById('plShuffle').addEventListener('click', playRandom);
+
+    const api = await loadEmbedAPI();
+    api.createController(document.getElementById('plEmbed'), { uri: first.uri, width: '100%', height: 80 }, c => {
+      controller = c;
+      c.addListener('ready', () => { if (pendingPlay) { pendingPlay = false; c.play(); } });
+      c.addListener('playback_update', e => {
+        const { isPaused, position, duration } = e.data;
+        // A song that reaches its end (full track or 30s preview) moves on to another random one
+        if (!ended && duration > 0 && position >= duration - 800 && (isPaused || position >= duration)) {
+          ended = true;
+          setTimeout(playRandom, 600);
+        }
+      });
+    });
+  }).catch(() => { box.hidden = true; });
+});
 
 /* ── Writing: latest Dev.to posts ── */
 (function () {

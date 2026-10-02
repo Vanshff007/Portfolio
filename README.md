@@ -22,7 +22,7 @@ An education, work and achievements timeline. The line draws itself as you scrol
 - **GitHub:** contribution heatmap for the last year, streak, top languages and the latest commits.
 - **LeetCode:** solved count with an Easy / Medium / Hard ring, contest rating, top percentage, max streak and a submission heatmap for the last year.
 - **Play the graphs:** click the GitHub heatmap to play **Pac-Man** on it (contributions are pellets, the brightest ones are power pellets). The maze walls sit on empty days, and power-ups appear now and then: ⚡ speed, ❄ freeze ghosts, 🧲 magnet, ×2 points and ♥ extra life. Click the LeetCode heatmap to play a **Space Shooter** where each submission is an enemy block (brighter blocks take more hits). Keyboard and touch controls; best scores are saved.
-- **Currently:** what I'm building, learning and reading, plus Spotify "now playing" when the server is set up.
+- **Currently:** what I'm building, learning and reading, plus a Spotify shuffle player for my playlist.
 
 ### Skills
 Switch between **Bars** and an interactive **Graph**. The graph links each skill to the projects that use it. Click a skill to highlight its projects, click a project to open its case study, and drag nodes around. Clicking a skill row in the bar view also filters the Projects section.
@@ -123,7 +123,7 @@ cp .env.example .env   # then fill in GEMINI_API_KEY
 npm run dev            # http://localhost:3000
 ```
 
-Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /api/health`. The chat uses `gemini-flash-lite-latest` with fallbacks (override with `GEMINI_MODEL`) and answers only from `server/profile.md`; edit that file to change what the assistant knows. CORS is limited to `ALLOWED_ORIGINS`, and the chat is rate limited to 20 questions per 10 minutes per IP.
+Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/playlist`, `GET /api/health`. The chat uses `gemini-flash-lite-latest` with fallbacks (override with `GEMINI_MODEL`) and answers only from `server/profile.md`; edit that file to change what the assistant knows. CORS is limited to `ALLOWED_ORIGINS`, and the chat is rate limited to 20 questions per 10 minutes per IP.
 
 ### Deploy on Render
 1. **New → Web Service**, connect this repo, and set **Root Directory** to `server`.
@@ -133,11 +133,16 @@ Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /
 
 The free tier sleeps when idle; the chat window pings `/api/health` when opened so the server starts waking up early.
 
-### Spotify (optional)
+### Spotify playlist (optional)
+The "Currently" panel shows a shuffle player for a public Spotify playlist. Click **Shuffle play** to start a random song; when it ends, another random one plays.
+
 1. Create an app at https://developer.spotify.com/dashboard. Under **Redirect URIs** add `http://127.0.0.1:8888/callback`, and tick **Web API**.
 2. Put the app's `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `server/.env`.
-3. Run `npm run spotify-token` in `server/`. Your browser opens Spotify; approve, and the script saves `SPOTIFY_REFRESH_TOKEN` to `server/.env`.
-4. On Render, add the same three `SPOTIFY_*` variables.
+3. Run `npm run spotify-token` in `server/`. Your browser opens Spotify; approve, and the script saves `SPOTIFY_REFRESH_TOKEN` to `server/.env`. (Spotify only lists a playlist's songs to a logged-in user, which is why this is needed.)
+4. Set `SPOTIFY_PLAYLIST_ID` to your playlist's ID (the part after `/playlist/` in its link). The playlist must be public.
+5. On Render, add the same `SPOTIFY_*` variables.
+
+Browsers block autoplay with sound, so music only starts after the visitor clicks. Visitors logged in to Spotify hear full songs; others get 30-second previews.
 
 ## Running locally
 

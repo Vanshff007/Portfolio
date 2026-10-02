@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
-  "description": "Small API behind the portfolio: AI chat (Gemini), LeetCode stats and Spotify now playing.",
+  "description": "Small API behind the portfolio: AI chat (Gemini), LeetCode stats and a Spotify playlist.",
   "type": "module",
   "main": "server.js",
   "scripts": {
