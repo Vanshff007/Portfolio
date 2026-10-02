@@ -16,11 +16,10 @@ const SITE = {
   // Shown only when the live LeetCode APIs are unreachable. Update now and then.
   leetcodeFallback: { total: 505, easy: 326, medium: 169, hard: 10, rating: 1743, topPercentage: 11.17, streak: null },
 
-  // Base URL of the Node server in server/ (deployed on Render).
-  // Leave empty to hide the features that need it (AI chat, Spotify)
-  // and to load LeetCode stats from the public fallback API instead.
-  // On localhost it uses the server from `npm run dev` in server/.
-  apiBase: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000' : '',
+  // Base URL of the Node server in server/. Set to '' to hide the features that
+  // need it (AI chat, Spotify); LeetCode then uses a public fallback API.
+  // Deployed on Render. On localhost it uses the server from `npm run dev` in server/.
+  apiBase: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000' : 'https://portfolio-api-46jx.onrender.com',
 
   // Dev.to username for the Writing section. Empty = section hidden.
   devtoUser: '',

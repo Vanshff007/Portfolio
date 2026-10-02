@@ -17,10 +17,11 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
   'https://vanshff007.github.io,https://portfolio-8una.onrender.com,http://localhost:5500,http://127.0.0.1:5500')
   .split(',').map(s => s.trim()).filter(Boolean);
 const LEETCODE_USER = process.env.LEETCODE_USER || 'idgaf_vansh';
-// 'gemini-flash-latest' always points at Google's current Flash model (free tier friendly)
-const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
-// Tried in order when a model is overloaded (503) or rate limited (429)
-const MODELS = [...new Set([MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'])];
+// Flash-Lite answers in ~1s and is plenty for short resume Q&A; the '-latest' alias
+// always points at Google's current version (free tier friendly)
+const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+// Tried in order when a model is overloaded (503), rate limited (429) or retired (404)
+const MODELS = [...new Set([MODEL, 'gemini-3.5-flash-lite', 'gemini-flash-latest'])];
 
 const profile = fs.readFileSync(new URL('./profile.md', import.meta.url), 'utf8');
 const SYSTEM_PROMPT = `You are the assistant on Vansh Minhas's portfolio website. Visitors are usually recruiters, engineers or students who want to know about Vansh.
@@ -110,8 +111,8 @@ app.post('/api/chat', rateLimit(20, 10 * 60 * 1000), async (req, res) => {
         }
         break;
       } catch (err) {
-        // Busy or out of quota: move to the next model, but only if nothing was sent yet
-        const busy = err instanceof ApiError && (err.status === 503 || err.status === 429);
+        // Busy, out of quota or retired: move to the next model, but only if nothing was sent yet
+        const busy = err instanceof ApiError && [404, 429, 503].includes(err.status);
         if (!busy || wrote || i === MODELS.length - 1 || abort.signal.aborted) throw err;
         console.warn(`Gemini ${model} returned ${err.status}, trying ${MODELS[i + 1]}`);
       }

@@ -120,7 +120,7 @@ cp .env.example .env   # then fill in GEMINI_API_KEY
 npm run dev            # http://localhost:3000
 ```
 
-Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /api/health`. The chat uses `gemini-flash-latest` (override with `GEMINI_MODEL`) and answers only from `server/profile.md`; edit that file to change what the assistant knows. CORS is limited to `ALLOWED_ORIGINS`, and the chat is rate limited to 20 questions per 10 minutes per IP.
+Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /api/health`. The chat uses `gemini-flash-lite-latest` with fallbacks (override with `GEMINI_MODEL`) and answers only from `server/profile.md`; edit that file to change what the assistant knows. CORS is limited to `ALLOWED_ORIGINS`, and the chat is rate limited to 20 questions per 10 minutes per IP.
 
 ### Deploy on Render
 1. **New → Web Service**, connect this repo, and set **Root Directory** to `server`.
@@ -131,17 +131,10 @@ Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/now-playing`, `GET /
 The free tier sleeps when idle; the chat window pings `/api/health` when opened so the server starts waking up early.
 
 ### Spotify (optional)
-1. Create an app at https://developer.spotify.com/dashboard and add the redirect URI `http://127.0.0.1:8888/callback`.
-2. Open this URL in your browser (replace `CLIENT_ID`) and approve:
-   `https://accounts.spotify.com/authorize?client_id=CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A8888%2Fcallback&scope=user-read-currently-playing%20user-read-recently-played`
-3. Copy the `code` from the redirect URL and exchange it for a refresh token:
-   ```bash
-   curl -X POST https://accounts.spotify.com/api/token \
-     -u CLIENT_ID:CLIENT_SECRET \
-     -d grant_type=authorization_code -d code=THE_CODE \
-     -d redirect_uri=http://127.0.0.1:8888/callback
-   ```
-4. Set `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN` on the server.
+1. Create an app at https://developer.spotify.com/dashboard. Under **Redirect URIs** add `http://127.0.0.1:8888/callback`, and tick **Web API**.
+2. Put the app's `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `server/.env`.
+3. Run `npm run spotify-token` in `server/`. Your browser opens Spotify; approve, and the script saves `SPOTIFY_REFRESH_TOKEN` to `server/.env`.
+4. On Render, add the same three `SPOTIFY_*` variables.
 
 ## Running locally
 
