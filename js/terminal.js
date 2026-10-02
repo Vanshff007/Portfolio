@@ -162,7 +162,6 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
       if (SITE.links[what]) { window.open(SITE.links[what], '_blank', 'noopener,noreferrer'); print(`Opening ${what}…`); return; }
       const p = PROJECTS[parseInt(what, 10) - 1];
       if (p) {
-        if (p.demo && /onrender.com/.test(p.demo)) { close(); launchRender(p.demo, p.demo); return; }
         window.open(p.demo || p.repoUrl, '_blank', 'noopener,noreferrer');
         print(`Opening ${esc(p.title)}${p.demo ? '' : ' (source code)'}…`);
         return;

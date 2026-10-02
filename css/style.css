@@ -74,15 +74,6 @@ section{padding:7rem 3rem;}
 .project-link:hover{color:var(--accent);}
 .project-link::after{content:'→';margin-left:0.3rem;}
 
-/* ── Render wake-up overlay ── */
-.wake-overlay{display:none;position:fixed;inset:0;z-index:9990;background:rgba(var(--bg-rgb),0.92);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;}
-.wake-overlay.active{display:flex;}
-.wake-spinner{width:48px;height:48px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spinFast 0.8s linear infinite;}
-.wake-msg{font-size:0.78rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;}
-.wake-sub{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-align:center;max-width:300px;line-height:1.6;}
-.wake-bar-wrap{width:220px;height:2px;background:var(--border);}
-.wake-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width 0.15s linear;}
-.wake-dismiss{font-size:0.6rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;cursor:inherit;margin-top:0.5rem;}
 @keyframes spinFast{to{transform:rotate(360deg);}}
 
 #skills{background:var(--surface);}
@@ -248,7 +239,7 @@ nav ul a:hover::after,nav ul a.active::after{transform:scaleX(1);}
 
 /* ── Touch devices: native cursor ── */
 @media (hover:none),(pointer:coarse){
-  body,.btn,.project-link,.social-btn,.term-toggle,.menu-btn,.to-top,#submit-btn,.wake-dismiss{cursor:auto;}
+  body,.btn,.project-link,.social-btn,.term-toggle,.menu-btn,.to-top,#submit-btn{cursor:auto;}
   .cursor,.cursor-ring{display:none;}
 }
 

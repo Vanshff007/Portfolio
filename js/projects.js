@@ -51,9 +51,7 @@ let PROJECTS = [];
   const isRender = url => /onrender\.com/.test(url || '');
   function demoLinkHTML(p) {
     if (!p.demo) return '';
-    return isRender(p.demo)
-      ? `<button class="project-link render-btn" data-render-url="${esc(p.demo)}">Live Demo</button>`
-      : `<a href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer" class="project-link">Live Demo</a>`;
+    return `<a href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer" class="project-link">Live Demo</a>`;
   }
 
   function cardHTML(p, i) {
@@ -154,7 +152,7 @@ let PROJECTS = [];
       <h3>Stack</h3>
       <div class="project-tech">${p.tech.map(t => `<span class="tech-chip">${esc(t)}</span>`).join('')}</div>
       <div class="modal-actions">
-        ${p.demo ? (isRender(p.demo) ? `<button class="btn btn-primary render-btn" data-render-url="${esc(p.demo)}">Live Demo</button>` : `<a class="btn btn-primary" href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer">Live Demo</a>`) : ''}
+        ${p.demo ? `<a class="btn btn-primary" href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer">Live Demo</a>` : ''}
         <a class="btn btn-ghost" href="${esc(p.repoUrl)}" target="_blank" rel="noopener noreferrer">Source Code ↗</a>
       </div>`;
     lastFocus = document.activeElement;
@@ -177,7 +175,7 @@ let PROJECTS = [];
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   grid.addEventListener('click', e => {
-    if (e.target.closest('a, .render-btn')) return; // links keep their own behaviour
+    if (e.target.closest('a')) return; // links keep their own behaviour
     const card = e.target.closest('.project-card[data-name]');
     if (card) openProject(card.dataset.name);
   });
