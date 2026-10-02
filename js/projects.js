@@ -129,7 +129,9 @@ let PROJECTS = [];
   const body  = document.getElementById('modalBody');
   let lastFocus = null;
 
-  const shotURL = p => p.demo && !isRender(p.demo)
+  // Streamlit apps render client-side, so a screenshot only catches the loading spinner
+  const isStreamlit = url => /streamlit\.app/.test(url || '');
+  const shotURL = p => p.demo && !isRender(p.demo) && !isStreamlit(p.demo)
     ? `https://api.microlink.io/?url=${encodeURIComponent(p.demo)}&screenshot=true&meta=false&embed=screenshot.url`
     : `https://opengraph.githubassets.com/1/${GH_USER}/${p.name}`;
   const ogURL = p => `https://opengraph.githubassets.com/1/${GH_USER}/${p.name}`;
