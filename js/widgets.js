@@ -33,6 +33,23 @@ function getRecentCommits() {
   return commitsPromise;
 }
 
+/* ── Contribution heatmap shared by GitHub and LeetCode ──
+   days: [{ date: 'YYYY-MM-DD', count, level 0-4 }], oldest first. Returns stats. */
+function drawHeatmap(el, days, noun) {
+  const offset = new Date(days[0].date + 'T00:00:00').getDay(); // align first column to Sunday
+  el.innerHTML = '<i class="pad"></i>'.repeat(offset) + days.map(c =>
+    `<i class="l${c.level}" title="${c.count} ${noun}${c.count === 1 ? '' : 's'} on ${new Date(c.date + 'T00:00:00').toDateString()}"></i>`).join('');
+  el.parentElement.scrollLeft = el.parentElement.scrollWidth; // newest on the right, visible on phones
+  let streak = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (days[i].count) streak++;
+    else if (i < days.length - 1) break; // today may still be empty
+  }
+  let longest = 0, run = 0;
+  for (const c of days) { run = c.count ? run + 1 : 0; longest = Math.max(longest, run); }
+  return { total: days.reduce((a, c) => a + c.count, 0), active: days.filter(c => c.count).length, streak, longest };
+}
+
 /* ── GitHub panel: heatmap, languages, latest commits ── */
 whenNear('activity', function () {
   const heat = document.getElementById('heatmap');
@@ -40,18 +57,8 @@ whenNear('activity', function () {
 
   cachedJSON('gh-contrib-v1', `https://github-contributions-api.jogruber.de/v4/${GH_USER}?y=last`, 6 * 3600 * 1000)
     .then(d => {
-      const days = d.contributions;
-      const offset = new Date(days[0].date).getDay(); // align first column to Sunday
-      heat.innerHTML = '<i class="pad"></i>'.repeat(offset) + days.map(c =>
-        `<i class="l${c.level}" title="${c.count} contribution${c.count === 1 ? '' : 's'} on ${new Date(c.date).toDateString()}"></i>`).join('');
-      const active = days.filter(c => c.count).length;
-      let streak = 0;
-      for (let i = days.length - 1; i >= 0; i--) {
-        if (days[i].count) streak++;
-        else if (i < days.length - 1) break; // today may still be empty
-      }
+      const { active, streak } = drawHeatmap(heat, d.contributions, 'contribution');
       total.innerHTML = `<b>${d.total.lastYear}</b> contributions in the last year · <b>${active}</b> active days · <b>${streak}</b>-day streak`;
-      heat.parentElement.scrollLeft = heat.parentElement.scrollWidth; // newest on the right, visible on phones
     })
     .catch(() => { total.textContent = 'Contribution graph unavailable right now.'; heat.parentElement.hidden = true; });
 
@@ -87,14 +94,17 @@ whenNear('activity', function () {
   async function load() {
     const server = apiURL('/api/leetcode');
     if (server) {
-      try { return await cachedJSON('lc-stats-v1', server, 3 * 3600 * 1000); } catch {}
+      try { return await cachedJSON('lc-stats-v2', server, 3 * 3600 * 1000); } catch {}
     }
     // Public fallback API (no streak data)
     const base = `https://alfa-leetcode-api.onrender.com/${SITE.leetcodeUser}`;
     return cachedJSON('lc-stats-fallback-v1', base + '/solved', 6 * 3600 * 1000).then(async s => {
       const c = await cachedJSON('lc-contest-fallback-v1', base + '/contest', 6 * 3600 * 1000).catch(() => ({}));
+      const cal = await cachedJSON('lc-calendar-fallback-v1', base + '/calendar', 6 * 3600 * 1000).catch(() => null);
+      const calendar = cal && Object.fromEntries(Object.entries(JSON.parse(cal.submissionCalendar || '{}'))
+        .map(([t, n]) => [new Date(t * 1000).toISOString().slice(0, 10), n]));
       return { total: s.solvedProblem, easy: s.easySolved, medium: s.mediumSolved, hard: s.hardSolved,
-               rating: c.contestRating, topPercentage: c.contestTopPercentage, streak: null };
+               rating: c.contestRating, topPercentage: c.contestTopPercentage, streak: cal?.streak ?? null, calendar };
     });
   }
   function ring(el, start, frac) {
@@ -124,7 +134,24 @@ whenNear('activity', function () {
     $('lcTop').textContent = d.topPercentage ? d.topPercentage.toFixed(1) + '%' : '–';
     $('lcStreak').textContent = d.streak ?? '–';
     if (d.streak == null) $('lcStreak').parentElement.hidden = true;
+    drawLeetCodeHeatmap(d.calendar);
   });
+
+  // Last 365 days ending today (UTC, matching LeetCode's day boundaries)
+  function drawLeetCodeHeatmap(calendar) {
+    const el = $('lcHeatmap'), label = $('lcHeatTotal');
+    if (!calendar) { label.textContent = 'Submission graph unavailable right now.'; el.parentElement.hidden = true; return; }
+    const max = Math.max(1, ...Object.values(calendar));
+    const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
+    const days = Array.from({ length: 365 }, (_, i) => {
+      const date = new Date(today - (364 - i) * 86400000).toISOString().slice(0, 10);
+      const count = calendar[date] || 0;
+      return { date, count, level: !count ? 0 : Math.min(4, Math.ceil(4 * count / max)) };
+    });
+    const { total, active, streak, longest } = drawHeatmap(el, days, 'submission');
+    label.innerHTML = `<b>${total}</b> submissions in the last year · <b>${active}</b> active days · ` +
+      (streak ? `<b>${streak}</b>-day streak · ` : '') + `longest streak <b>${longest}</b> days`;
+  }
 });
 
 /* ── "Currently" widget + Spotify now playing ── */

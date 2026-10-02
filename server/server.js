@@ -135,7 +135,7 @@ const getLeetCode = cached(60 * 60 * 1000, async () => {
   const query = `query($u: String!) {
     matchedUser(username: $u) {
       submitStatsGlobal { acSubmissionNum { difficulty count } }
-      userCalendar { streak totalActiveDays }
+      userCalendar { streak totalActiveDays submissionCalendar }
     }
     userContestRanking(username: $u) { rating globalRanking topPercentage attendedContestsCount }
   }`;
@@ -148,10 +148,14 @@ const getLeetCode = cached(60 * 60 * 1000, async () => {
   const { data } = await r.json();
   const ac = Object.fromEntries(data.matchedUser.submitStatsGlobal.acSubmissionNum.map(x => [x.difficulty, x.count]));
   const c = data.userContestRanking || {};
+  const cal = data.matchedUser.userCalendar;
+  // LeetCode keys are unix timestamps at UTC midnight; send plain dates instead
+  const calendar = Object.fromEntries(Object.entries(JSON.parse(cal?.submissionCalendar || '{}'))
+    .map(([t, n]) => [new Date(t * 1000).toISOString().slice(0, 10), n]));
   return {
     total: ac.All, easy: ac.Easy, medium: ac.Medium, hard: ac.Hard,
     rating: c.rating ?? null, topPercentage: c.topPercentage ?? null, contests: c.attendedContestsCount ?? null,
-    streak: data.matchedUser.userCalendar?.streak ?? null, activeDays: data.matchedUser.userCalendar?.totalActiveDays ?? null,
+    streak: cal?.streak ?? null, activeDays: cal?.totalActiveDays ?? null, calendar,
   };
 });
 app.get('/api/leetcode', async (req, res) => {

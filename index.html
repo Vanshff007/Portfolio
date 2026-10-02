@@ -215,8 +215,10 @@
         <div><div class="panel-sub">Latest commits</div><ul class="commit-list" id="commitList"><li class="muted">Loading…</li></ul></div>
       </div>
     </div>
-    <div class="panel reveal" id="lcPanel" style="transition-delay:0.1s">
+    <div class="panel panel-wide reveal" id="lcPanel">
       <div class="panel-head"><span class="panel-title lc">LeetCode</span><a class="panel-link" href="https://leetcode.com/u/idgaf_vansh/" target="_blank" rel="noopener noreferrer">@idgaf_vansh ↗</a></div>
+      <div class="lc-grid">
+      <div class="lc-left">
       <div class="lc-body">
         <svg class="lc-ring" viewBox="0 0 120 120" aria-hidden="true">
           <circle cx="60" cy="60" r="50" class="ring-bg"/>
@@ -234,10 +236,17 @@
       <div class="lc-stats">
         <div><b id="lcRating">–</b><span>contest rating</span></div>
         <div><b id="lcTop">–</b><span>top</span></div>
-        <div><b id="lcStreak">–</b><span>day streak</span></div>
+        <div><b id="lcStreak">–</b><span>max streak</span></div>
+      </div>
+      </div>
+      <div class="lc-right">
+        <div class="panel-sub">Submissions in the last year</div>
+        <div class="heatmap-wrap"><div class="heatmap lc-heat" id="lcHeatmap" role="img" aria-label="LeetCode submissions in the last year"></div></div>
+        <div class="heatmap-foot"><span id="lcHeatTotal">Loading submissions…</span><span class="heat-legend lc-heat">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</span></div>
+      </div>
       </div>
     </div>
-    <div class="panel reveal" id="nowPanel" style="transition-delay:0.2s">
+    <div class="panel panel-wide reveal" id="nowPanel">
       <div class="panel-head"><span class="panel-title">Currently</span><span class="live-pill">live</span></div>
       <ul class="now-list" id="nowList"></ul>
       <div class="spotify" id="spotify" hidden></div>
