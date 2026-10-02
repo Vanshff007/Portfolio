@@ -31,13 +31,13 @@ const SITE = {
   // from the giscus.app setup page. Empty = guestbook shows a setup note.
   giscus: {
     repo: 'Vanshff007/Portfolio',
-    repoId: '',
-    category: 'Guestbook',
-    categoryId: '',
+    repoId: 'R_kgDOR7erww',
+    category: 'Announcements', // only maintainers and giscus can start threads here
+    categoryId: 'DIC_kwDOR7erw84DG452',
   },
 
   // Namespace for the free visitor counter (abacus.jasoncameron.dev).
-  counterNamespace: 'vanshff007-portfolio-v2',
+  counterNamespace: 'vanshff007-portfolio-v3',
 
   // "Currently" widget. Edit freely.
   now: {

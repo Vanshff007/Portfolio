@@ -106,11 +106,10 @@ Everything you would normally edit is in `js/config.js`:
 
 After changing the projects config, bump `CACHE_KEY` in `js/projects.js` (for example `gh-projects-v3` to `gh-projects-v4`) so returning visitors get the new list right away.
 
-### Guestbook setup (once)
-1. In the repo on GitHub, open **Settings → General → Features** and enable **Discussions**.
-2. Create a discussion category named `Guestbook` (type: Announcement works well, so only giscus can create the thread).
-3. Install the [giscus app](https://github.com/apps/giscus) on the repo.
-4. Open https://giscus.app, enter `Vanshff007/Portfolio`, choose the `Guestbook` category, and copy `data-repo-id` and `data-category-id` into `SITE.giscus` in `js/config.js`.
+### Guestbook
+Done for this repo: Discussions are enabled, the giscus app is installed, and `SITE.giscus` points at the **Announcements** category (only maintainers and giscus can start threads there, so visitors can only reply in the one "Guestbook" thread). `giscus.json` limits which sites may embed it.
+
+To set it up on a fork: enable Discussions, install the [giscus app](https://github.com/apps/giscus), get the repo and category IDs from https://giscus.app, put them in `SITE.giscus`, and update the origins in `giscus.json`.
 
 ## Server (AI chat, LeetCode, Spotify)
 
