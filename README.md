@@ -134,7 +134,7 @@ Endpoints: `POST /api/chat`, `GET /api/leetcode`, `GET /api/playlist`, `GET /api
 The free tier sleeps when idle; the chat window pings `/api/health` when opened so the server starts waking up early.
 
 ### Spotify playlist (optional)
-The "Currently" panel shows a shuffle player for a public Spotify playlist. Click **Shuffle play** to start a random song; when it ends, another random one plays.
+A floating mini player (bottom left) plays a public Spotify playlist: `SITE.firstSong` first, then the rest in random order. It starts on its own where the browser allows autoplay, otherwise on the visitor's first click, tap or key press. Visitors can skip (⏭) or close it, and the "Currently" panel has Play/Pause and Next buttons too. Songs added to the playlist show up within about 10 minutes.
 
 1. Create an app at https://developer.spotify.com/dashboard. Under **Redirect URIs** add `http://127.0.0.1:8888/callback`, and tick **Web API**.
 2. Put the app's `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `server/.env`.
@@ -142,7 +142,7 @@ The "Currently" panel shows a shuffle player for a public Spotify playlist. Clic
 4. Set `SPOTIFY_PLAYLIST_ID` to your playlist's ID (the part after `/playlist/` in its link). The playlist must be public.
 5. On Render, add the same `SPOTIFY_*` variables.
 
-Browsers block autoplay with sound, so music only starts after the visitor clicks. Visitors logged in to Spotify hear full songs; others get 30-second previews.
+Most browsers block sound until the visitor interacts with the page, so music can't be guaranteed to start with no click at all. Visitors logged in to Spotify hear full songs; others get 30-second previews.
 
 ## Running locally
 

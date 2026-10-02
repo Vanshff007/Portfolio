@@ -192,7 +192,8 @@ async function spotifyAccessToken() {
   spotifyTokenExpires = Date.now() + (d.expires_in - 60) * 1000;
   return spotifyToken;
 }
-const getPlaylist = cached(60 * 60 * 1000, async () => {
+// Cached 10 minutes, so songs added to the playlist show up soon
+const getPlaylist = cached(10 * 60 * 1000, async () => {
   const headers = { Authorization: 'Bearer ' + await spotifyAccessToken() };
   const meta = await fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?fields=name,external_urls,images`, { headers });
   if (!meta.ok) throw new Error('Spotify playlist HTTP ' + meta.status);
@@ -215,7 +216,7 @@ const getPlaylist = cached(60 * 60 * 1000, async () => {
 app.get('/api/playlist', async (req, res) => {
   if (!spotifyConfigured()) return res.json({ configured: false });
   try {
-    res.setHeader('Cache-Control', 'public, max-age=600');
+    res.setHeader('Cache-Control', 'public, max-age=300');
     res.json({ configured: true, ...(await getPlaylist()) });
   } catch (err) {
     console.error('Spotify error', err.message);

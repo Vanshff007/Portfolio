@@ -162,41 +162,53 @@ whenNear('activity', function () {
     `<li><span class="now-k">${icons[k] || '•'} ${esc(k)}</span><span class="now-v">${esc(v)}</span></li>`).join('');
 })();
 
-/* ── Spotify shuffle player ──────────────────────────────────────
-   Songs come from my public playlist (server /api/playlist). Playback uses
-   Spotify's official embed. Browsers block autoplay with sound, so music
-   starts on the first click of "Shuffle play"; after that, each song that
-   ends moves on to another random one. Logged-out visitors get 30s previews.
+/* ── Spotify player ──────────────────────────────────────────────
+   Songs come from my public playlist (server /api/playlist), played through
+   Spotify's official embed. It tries to start as soon as the page has loaded;
+   most browsers block sound until the visitor interacts, so if that is blocked
+   it starts on their first click, tap or key press anywhere on the page.
+   SITE.firstSong plays first, then the rest in random order. The embed lives in a
+   floating mini player (Spotify only loads embeds that are on screen), so it
+   can be paused from anywhere; if the visitor pauses or closes it, it won't
+   autostart again this visit. Logged-out visitors hear 30-second previews.
 ────────────────────────────────────────────────────────────────── */
-whenNear('activity', function () {
+(function () {
   const url = apiURL('/api/playlist');
   if (!url) return;
   const box = document.getElementById('spotify');
-  let tracks = [], queue = [], current = null, controller = null, pendingPlay = false, ended = false;
+  const mini = document.getElementById('miniPlayer');
+  let tracks = [], queue = [], current = null, controller = null, embedLoading = null;
+  let playing = false, wantPlay = false, ended = false, announced = false;
+  const OFF_KEY = 'music-off';
+  const isOff = () => { try { return sessionStorage.getItem(OFF_KEY) === '1'; } catch { return false; } };
+  const setOff = v => { try { v ? sessionStorage.setItem(OFF_KEY, '1') : sessionStorage.removeItem(OFF_KEY); } catch {} };
 
-  // Shuffled order without repeats until every song has played once
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // First song is fixed; after that, a shuffled order with no repeats until all have played
   function nextTrack() {
+    if (!current) {
+      const first = tracks.find(t => norm(t.title) === norm(SITE.firstSong || ''));
+      if (first) return first;
+    }
     if (!queue.length) {
       queue = tracks.filter(t => t !== current).sort(() => Math.random() - 0.5);
       if (!queue.length) queue = tracks.slice();
     }
     return queue.shift();
   }
+
   function show(t) {
     current = t;
     document.getElementById('plTitle').textContent = t.title;
     document.getElementById('plArtist').textContent = t.artist;
   }
-  function playRandom() {
-    const t = nextTrack();
-    show(t);
-    ended = false;
-    if (!controller) return;
-    pendingPlay = true;
-    controller.loadUri(t.uri);
-    // The embed fires "ready" after loading; play then (with a fallback for slow loads)
-    setTimeout(() => { if (pendingPlay) { pendingPlay = false; controller.play(); } }, 1200);
-    document.getElementById('plShuffle').innerHTML = '🔀 Next random';
+  function setPlaying(v) {
+    playing = v;
+    document.getElementById('plPlay').innerHTML = v ? '⏸ Pause' : '▶ Play';
+    if (v && !announced) {
+      announced = true;
+      flash(`🎧 Playing "${current.title}" from my playlist. Pause anytime, bottom left.`);
+    }
   }
 
   function loadEmbedAPI() {
@@ -209,41 +221,96 @@ whenNear('activity', function () {
       document.head.appendChild(s);
     });
   }
+  // The embed is heavy, so it only loads when music is first wanted
+  function ensureEmbed() {
+    embedLoading = embedLoading || loadEmbedAPI().then(api => new Promise(resolve => {
+      api.createController(document.getElementById('plEmbed'), { uri: current.uri, width: '100%', height: 80 }, c => {
+        controller = c;
+        c.addListener('ready', () => { if (wantPlay) { wantPlay = false; c.play(); } });
+        c.addListener('playback_update', e => {
+          const { isPaused, isBuffering, position, duration } = e.data;
+          if (!isBuffering) {
+            // Pausing in Spotify's own button counts too: no autostart again this visit
+            if (playing && isPaused && position < duration - 800) setOff(true);
+            if (!isPaused) setOff(false);
+            setPlaying(!isPaused);
+          }
+          // A song that reaches its end (full track or 30s preview) moves on to a random one
+          if (!ended && duration > 0 && position >= duration - 800 && (isPaused || position >= duration)) {
+            ended = true;
+            setTimeout(() => playTrack(nextTrack()), 600);
+          }
+        });
+        resolve(c);
+      });
+    }));
+    return embedLoading;
+  }
 
-  cachedJSON('spotify-playlist-v1', url, 30 * 60 * 1000).then(async d => {
+  async function playTrack(t) {
+    show(t);
+    ended = false;
+    mini.hidden = false;
+    const fresh = !controller;
+    wantPlay = true;
+    const c = await ensureEmbed();
+    if (!fresh) c.loadUri(t.uri);
+    // Fallback in case "ready" already fired before we asked to play
+    setTimeout(() => { if (wantPlay) { wantPlay = false; c.play(); } }, 1500);
+  }
+  function toggle() {
+    if (!controller || mini.hidden) { setOff(false); playTrack(current); return; }
+    setOff(playing); // pausing turns autostart off for this visit
+    controller.togglePlay();
+  }
+  function next() { setOff(false); playTrack(nextTrack()); }
+
+  cachedJSON('spotify-playlist-v2', url, 10 * 60 * 1000).then(d => {
     if (!d.configured || !d.tracks?.length) return;
     tracks = d.tracks;
     box.hidden = false;
     box.innerHTML = `
       <div class="pl-head">
-        ${d.cover ? `<img src="${esc(d.cover)}" alt="" width="52" height="52">` : ''}
+        ${d.cover ? `<img src="${esc(d.cover)}" alt="" width="52" height="52" loading="lazy">` : ''}
         <div class="pl-meta">
           <span class="now-k">🎧 my playlist · <a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.name)}</a> · ${tracks.length} songs</span>
           <span class="now-v" id="plTitle"></span>
           <span class="spot-artist" id="plArtist"></span>
         </div>
-        <button class="pl-shuffle" id="plShuffle" type="button">🔀 Shuffle play</button>
+        <div class="pl-btns">
+          <button class="pl-shuffle" id="plPlay" type="button">▶ Play</button>
+          <button class="pl-next" id="plNext" type="button" aria-label="Next random song" title="Next random song">⏭</button>
+        </div>
       </div>
-      <div class="pl-embed"><div id="plEmbed"></div></div>`;
-    const first = nextTrack();
-    show(first);
-    document.getElementById('plShuffle').addEventListener('click', playRandom);
-
-    const api = await loadEmbedAPI();
-    api.createController(document.getElementById('plEmbed'), { uri: first.uri, width: '100%', height: 80 }, c => {
-      controller = c;
-      c.addListener('ready', () => { if (pendingPlay) { pendingPlay = false; c.play(); } });
-      c.addListener('playback_update', e => {
-        const { isPaused, position, duration } = e.data;
-        // A song that reaches its end (full track or 30s preview) moves on to another random one
-        if (!ended && duration > 0 && position >= duration - 800 && (isPaused || position >= duration)) {
-          ended = true;
-          setTimeout(playRandom, 600);
-        }
-      });
+      <p class="pl-note">Plays in the mini player at the bottom left.</p>`;
+    show(nextTrack());
+    document.getElementById('plPlay').addEventListener('click', e => { e.stopPropagation(); toggle(); });
+    document.getElementById('plNext').addEventListener('click', e => { e.stopPropagation(); next(); });
+    mini.querySelector('.mp-next').addEventListener('click', e => { e.stopPropagation(); next(); });
+    mini.querySelector('.mp-close').addEventListener('click', e => {
+      e.stopPropagation();
+      setOff(true);
+      if (playing) controller?.togglePlay();
+      setPlaying(false);
+      mini.hidden = true;
     });
+
+    if (isOff()) return;
+    // 1) Try right after the page has loaded (kept off the critical path). Works where
+    //    the browser allows autoplay with sound for this site.
+    const tryNow = () => { if (!isOff() && !controller) playTrack(current); };
+    if (document.readyState === 'complete') setTimeout(tryNow, 1500);
+    else addEventListener('load', () => setTimeout(tryNow, 1500), { once: true });
+    // 2) Otherwise start on the visitor's first interaction, which browsers do allow
+    const start = e => {
+      if (e.target.closest?.('#miniPlayer, #spotify')) return; // those controls handle it themselves
+      ['pointerdown', 'keydown'].forEach(t => removeEventListener(t, start, true));
+      if (isOff() || playing) return;
+      if (controller && !mini.hidden) controller.play(); else playTrack(current);
+    };
+    ['pointerdown', 'keydown'].forEach(t => addEventListener(t, start, true));
   }).catch(() => { box.hidden = true; });
-});
+})();
 
 /* ── Writing: latest Dev.to posts ── */
 (function () {

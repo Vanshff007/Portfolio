@@ -21,6 +21,9 @@ const SITE = {
   // Deployed on Render. On localhost it uses the server from `npm run dev` in server/.
   apiBase: ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:3000' : 'https://portfolio-api-46jx.onrender.com',
 
+  // The Spotify player always starts with this song (title from the playlist), then shuffles.
+  firstSong: 'No One Noticed',
+
   // Dev.to username for the Writing section. Empty = section hidden.
   devtoUser: '',
 
