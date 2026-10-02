@@ -149,3 +149,9 @@ Then open http://localhost:5500.
 ## Tech
 
 HTML, CSS, vanilla JavaScript, Canvas API, Web Audio API, GitHub REST API, LeetCode GraphQL, Dev.to API, giscus, Formspree, Node.js, Express, Gemini API.
+
+## License
+
+The code is released under the [MIT License](LICENSE). You're welcome to reuse it for your own portfolio; a link back is appreciated.
+
+Personal content is not covered by the license: my resume (`assets/resume.pdf`), the text in `js/config.js` and `server/profile.md` about me and my projects, and my name and photos. Please replace these with your own.
