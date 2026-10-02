@@ -63,39 +63,113 @@
   }
 
   /* ── Pac-Man ── */
+  const PAC_POWERUPS = [
+    { id: 'speed',  icon: '⚡', label: 'Speed',         ms: 6000, weight: 3 },
+    { id: 'freeze', icon: '❄', label: 'Ghosts frozen', ms: 4000, weight: 3 },
+    { id: 'magnet', icon: '🧲', label: 'Magnet',        ms: 6000, weight: 2 },
+    { id: 'double', icon: '×2', label: 'Double points', ms: 8000, weight: 3 },
+    { id: 'life',   icon: '♥', label: 'Extra life',    ms: 0,    weight: 1 },
+  ];
+
+  // Small seeded random generator, so the maze looks the same on every visit
+  function seededRandom(seed) {
+    return () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  // Place short wall pieces on empty days only. A piece is kept only if every open
+  // cell is still reachable, so no pellet is ever walled off.
+  function buildWalls(cols, rows, pellets) {
+    const walls = Array.from({ length: cols }, () => new Array(rows).fill(false));
+    let seed = 7;
+    pellets.forEach((col, x) => col.forEach((lv, y) => { seed = (seed * 31 + lv * (x * rows + y + 1)) | 0; }));
+    const rand = seededRandom(seed);
+    const isProtected = (x, y) => pellets[x][y] > 0 || (x <= 2 && y >= 2 && y <= 4) || (x >= cols - 3 && y >= 1 && y <= 5);
+    const open = () => { let n = 0; for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) if (!walls[x][y]) n++; return n; };
+    const reachable = () => {
+      const seen = new Uint8Array(cols * rows), q = [[0, 3]];
+      seen[3] = 1;
+      let n = 0;
+      while (q.length) {
+        const [x, y] = q.pop(); n++;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || walls[nx][ny] || seen[nx * rows + ny]) continue;
+          seen[nx * rows + ny] = 1; q.push([nx, ny]);
+        }
+      }
+      return n;
+    };
+    let empty = 0;
+    pellets.forEach((col, x) => col.forEach((lv, y) => { if (!isProtected(x, y)) empty++; }));
+    const target = Math.floor(empty * 0.3);
+    let placed = 0;
+    for (let tries = 0; tries < cols * 8 && placed < target; tries++) {
+      const horizontal = rand() < 0.6, len = 2 + Math.floor(rand() * (horizontal ? 3 : 2));
+      const x0 = Math.floor(rand() * cols), y0 = Math.floor(rand() * rows);
+      const cells = Array.from({ length: len }, (_, i) => horizontal ? [x0 + i, y0] : [x0, y0 + i]);
+      if (cells.some(([x, y]) => x >= cols || y >= rows || walls[x][y] || isProtected(x, y))) continue;
+      cells.forEach(([x, y]) => { walls[x][y] = true; });
+      if (reachable() !== open()) cells.forEach(([x, y]) => { walls[x][y] = false; });
+      else placed += len;
+    }
+    return walls;
+  }
+
   function pacman(src) {
-    const { cols, grid, rgb } = src, rows = 7, STEP = 150;
+    const { cols, grid, rgb } = src, rows = 7;
+    const PAC_STEP = 150, FAST_STEP = 95, GHOST_STEP = 150;
     const pellets = grid.map(col => col.slice());
+    const walls = buildWalls(cols, rows, pellets);
     let left = pellets.flat().filter(Boolean).length;
     const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
     const pac = { x: 0, y: 3, px: 0, py: 3, dir: [1, 0], next: [1, 0] };
     const ghostColors = [`rgb(${themeRGB.accent2})`, `rgb(${themeRGB.accent3})`, '#ff9f43', '#4dd0e1'];
-    const ghostCount = cols > 30 ? 4 : 3;
-    const homeX = i => cols - 1 - i * 2;
-    const ghosts = Array.from({ length: ghostCount }, (_, i) => ({ x: homeX(i), y: [1, 3, 5, 2][i], px: homeX(i), py: [1, 3, 5, 2][i], dir: [-1, 0], color: ghostColors[i], delay: 6 + i * 8, eaten: false }));
-    let acc = 0, tick = 0, fright = 0, respawn = 0;
+    const HOMES = [[cols - 1, 1], [cols - 1, 5], [cols - 3, 3], [cols - 1, 3]];
+    const ghosts = HOMES.slice(0, cols > 30 ? 4 : 3).map(([x, y], i) => ({ x, y, px: x, py: y, dir: [-1, 0], color: ghostColors[i], delay: 6 + i * 8, eaten: false, home: [x, y] }));
+    let pacAcc = 0, ghostAcc = 0, gtick = 0, frightMs = 0, respawn = 0;
+    let item = null, spawnIn = 5000, lastPowerText = '';
+    const active = {}; // power-up id → ms left
     const g = { kind: 'pacman', state: 'ready', score: 0, lives: 3 };
 
-    // The graph's edges are walls (no wrap-around, so ghosts can't spawn next to you)
-    const clampX = x => Math.min(cols - 1, Math.max(0, x));
-    const dist = (ax, ay, bx, by) => Math.abs(ax - bx) + Math.abs(ay - by);
-    const canMove = (o, d) => o.x + d[0] >= 0 && o.x + d[0] < cols && o.y + d[1] >= 0 && o.y + d[1] < rows;
+    const inside = (x, y) => x >= 0 && y >= 0 && x < cols && y < rows;
+    const free = (x, y) => inside(x, y) && !walls[x][y];
+    const canMove = (o, d) => free(o.x + d[0], o.y + d[1]);
     function move(o, d) { o.px = o.x; o.py = o.y; o.x += d[0]; o.y += d[1]; }
+
+    // Shortest-path distances through the maze from one cell (BFS)
+    function distanceMap(tx, ty) {
+      const dist = new Int16Array(cols * rows).fill(-1), q = [tx * rows + ty];
+      dist[q[0]] = 0;
+      for (let h = 0; h < q.length; h++) {
+        const x = Math.floor(q[h] / rows), y = q[h] % rows;
+        for (const [dx, dy] of DIRS) {
+          const nx = x + dx, ny = y + dy, k = nx * rows + ny;
+          if (!free(nx, ny) || dist[k] >= 0) continue;
+          dist[k] = dist[q[h]] + 1; q.push(k);
+        }
+      }
+      return dist;
+    }
 
     function chooseDir(gh, i) {
       let opts = DIRS.filter(d => canMove(gh, d) && !(d[0] === -gh.dir[0] && d[1] === -gh.dir[1]));
       if (!opts.length) opts = DIRS.filter(d => canMove(gh, d));
-      if (Math.random() < (fright ? 0.5 : 0.22)) return opts[Math.floor(Math.random() * opts.length)];
-      // Each ghost aims a little differently so they spread out
-      const tx = clampX(pac.x + pac.dir[0] * [0, 4, -3, 2][i]), ty = pac.y;
-      const score = d => dist(gh.x + d[0], gh.y + d[1], tx, ty);
-      return opts.reduce((best, d) => (fright ? score(d) > score(best) : score(d) < score(best)) ? d : best);
+      if (!opts.length) return [0, 0];
+      const scared = frightMs > 0 && !gh.eaten;
+      if (Math.random() < (scared ? 0.35 : 0.15)) return opts[Math.floor(Math.random() * opts.length)];
+      // Each ghost aims a little differently (straight at you, ahead of you, behind you)
+      const off = [0, 3, -2, 2][i];
+      let tx = Math.min(cols - 1, Math.max(0, pac.x + pac.dir[0] * off)), ty = Math.min(rows - 1, Math.max(0, pac.y + pac.dir[1] * off));
+      if (!free(tx, ty)) { tx = pac.x; ty = pac.y; }
+      const dist = distanceMap(tx, ty);
+      const d = o => dist[(gh.x + o[0]) * rows + gh.y + o[1]];
+      return opts.reduce((best, o) => (scared ? d(o) > d(best) : d(o) < d(best)) ? o : best);
     }
 
     function resetPositions() {
       Object.assign(pac, { x: 0, y: 3, px: 0, py: 3, dir: [1, 0], next: [1, 0] });
-      ghosts.forEach((gh, i) => Object.assign(gh, { x: homeX(i), y: [1, 3, 5, 2][i], px: homeX(i), py: [1, 3, 5, 2][i], dir: [-1, 0], delay: 6 + i * 8, eaten: false }));
-      fright = 0;
+      ghosts.forEach((gh, i) => Object.assign(gh, { x: gh.home[0], y: gh.home[1], px: gh.home[0], py: gh.home[1], dir: [-1, 0], delay: 6 + i * 8, eaten: false }));
+      frightMs = 0; pacAcc = 0; ghostAcc = 0;
     }
 
     function collide() {
@@ -103,14 +177,14 @@
         const same = gh.x === pac.x && gh.y === pac.y;
         const swapped = gh.x === pac.px && gh.y === pac.py && gh.px === pac.x && gh.py === pac.y;
         if (!same && !swapped) continue;
-        if (fright && gh.eaten) continue; // eaten ghosts are harmless until the power pellet wears off
-        if (fright) {
-          g.score += 200; sfx('success');
-          Object.assign(gh, { x: cols - 1, y: 3, px: cols - 1, py: 3, delay: 12, eaten: true });
+        if (frightMs > 0 && gh.eaten) continue; // eaten ghosts are harmless until the power pellet wears off
+        if (frightMs > 0) {
+          g.score += 200 * (active.double ? 2 : 1); sfx('success');
+          Object.assign(gh, { x: gh.home[0], y: gh.home[1], px: gh.home[0], py: gh.home[1], delay: 12, eaten: true });
         } else {
           g.lives--; sfx('error');
           hud(g.score, g.lives);
-          if (g.lives <= 0) return endGame(false);
+          if (g.lives <= 0) { endGame(false); return; }
           respawn = 900;
           resetPositions();
           return;
@@ -118,49 +192,97 @@
       }
     }
 
-    function step() {
-      tick++;
+    function eatAt(x, y) {
+      const lv = pellets[x][y];
+      if (!lv) return;
+      pellets[x][y] = 0; left--;
+      g.score += lv * 10 * (active.double ? 2 : 1);
+      if (lv === 4) { frightMs = 6500; ghosts.forEach(gh => { gh.eaten = false; }); sfx('open'); } else sfx('key');
+    }
+
+    function pickUp() {
+      if (!item || item.x !== pac.x || item.y !== pac.y) return;
+      const p = item.type;
+      if (p.id === 'life') g.lives = Math.min(5, g.lives + 1);
+      else active[p.id] = p.ms;
+      item = null;
+      sfx('success');
+      flash(`${p.icon} ${p.label}!`);
+    }
+
+    function pacStep() {
       if (canMove(pac, pac.next)) pac.dir = pac.next;
       if (canMove(pac, pac.dir)) move(pac, pac.dir); else { pac.px = pac.x; pac.py = pac.y; }
-      const lv = pellets[pac.x][pac.y];
-      if (lv) {
-        pellets[pac.x][pac.y] = 0; left--;
-        g.score += lv * 10;
-        if (lv === 4) { fright = 45; ghosts.forEach(gh => { gh.eaten = false; }); sfx('open'); } else if (tick % 2) sfx('key');
-        hud(g.score, g.lives);
-        if (!left) return endGame(true);
+      eatAt(pac.x, pac.y);
+      if (active.magnet) {
+        for (let x = pac.x - 2; x <= pac.x + 2; x++) for (let y = pac.y - 2; y <= pac.y + 2; y++)
+          if (inside(x, y) && Math.abs(x - pac.x) + Math.abs(y - pac.y) <= 2) eatAt(x, y);
       }
+      pickUp();
+      hud(g.score, g.lives);
+      if (!left) { endGame(true); return; }
       collide();
-      if (g.state !== 'play' || respawn) return;
+    }
+
+    function ghostStep() {
+      gtick++;
       ghosts.forEach((gh, i) => {
         gh.px = gh.x; gh.py = gh.y;
         if (gh.delay > 0) { gh.delay--; return; }
-        if (fright && !gh.eaten ? tick % 2 : tick % 5 === 0) return; // ghosts are a bit slower than you
+        if (active.freeze) return;
+        if (frightMs > 0 && !gh.eaten ? gtick % 2 : gtick % 5 === 0) return; // ghosts are a bit slower than you
         gh.dir = chooseDir(gh, i);
         move(gh, gh.dir);
       });
       collide();
-      if (fright > 0 && --fright === 0) ghosts.forEach(gh => { gh.eaten = false; });
+    }
+
+    function spawnItem() {
+      const options = PAC_POWERUPS.filter(p => p.id !== 'life' || g.lives < 3);
+      let r = Math.random() * options.reduce((a, p) => a + p.weight, 0), type = options[0];
+      for (const p of options) { r -= p.weight; if (r <= 0) { type = p; break; } }
+      const cells = [];
+      for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++)
+        if (free(x, y) && !pellets[x][y] && Math.abs(x - pac.x) + Math.abs(y - pac.y) >= 5 && !ghosts.some(gh => gh.x === x && gh.y === y)) cells.push([x, y]);
+      if (!cells.length) return;
+      const [x, y] = cells[Math.floor(Math.random() * cells.length)];
+      item = { x, y, type, ttl: 8000 };
+    }
+
+    function updatePowerHud() {
+      const text = Object.entries(active).map(([id, ms]) => `${PAC_POWERUPS.find(p => p.id === id).icon} ${Math.ceil(ms / 1000)}s`).join('  ');
+      if (text !== lastPowerText) { $('gamePower').textContent = text; lastPowerText = text; }
     }
 
     g.input = d => { pac.next = d; };
     g.update = dt => {
       if (respawn > 0) { respawn = Math.max(0, respawn - dt); return; }
-      acc += dt;
-      while (acc >= STEP && g.state === 'play') { acc -= STEP; step(); }
+      for (const id in active) { active[id] -= dt; if (active[id] <= 0) delete active[id]; }
+      updatePowerHud();
+      if (frightMs > 0 && (frightMs -= dt) <= 0) { frightMs = 0; ghosts.forEach(gh => { gh.eaten = false; }); }
+      if (item && (item.ttl -= dt) <= 0) item = null;
+      if (!item && (spawnIn -= dt) <= 0) { spawnItem(); spawnIn = 9000 + Math.random() * 4000; }
+      const step = active.speed ? FAST_STEP : PAC_STEP;
+      pacAcc += dt;
+      while (pacAcc >= step && g.state === 'play' && !respawn) { pacAcc -= step; pacStep(); }
+      ghostAcc += dt;
+      while (ghostAcc >= GHOST_STEP && g.state === 'play' && !respawn) { ghostAcc -= GHOST_STEP; ghostStep(); }
     };
+
     g.draw = t => {
-      const c = view.cell, k = respawn ? 1 : Math.min(1, acc / STEP);
-      const lerp = o => {
-        const jump = Math.abs(o.x - o.px) + Math.abs(o.y - o.py) > 1; // respawned: don't slide across the board
-        return jump ? [o.x, o.y] : [o.px + (o.x - o.px) * k, o.py + (o.y - o.py) * k];
-      };
-      const [pxf, pyf] = lerp(pac);
+      const c = view.cell;
+      const lerp = (o, k) => Math.abs(o.x - o.px) + Math.abs(o.y - o.py) > 1 || respawn
+        ? [o.x, o.y] // respawned: don't slide across the board
+        : [o.px + (o.x - o.px) * k, o.py + (o.y - o.py) * k];
+      const [pxf, pyf] = lerp(pac, Math.min(1, pacAcc / (active.speed ? FAST_STEP : PAC_STEP)));
       camera(pxf + 0.5, cols);
       ctx.clearRect(0, 0, view.viewW, view.viewH);
       ctx.save(); ctx.translate(-Math.round(view.camX), 0);
+
+      // Floor and pellets
       for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) {
-        ctx.fillStyle = `rgba(${themeRGB.fg},0.045)`;
+        if (walls[x][y]) continue;
+        ctx.fillStyle = `rgba(${themeRGB.fg},0.04)`;
         ctx.fillRect(x * c + 1.5, y * c + 1.5, c - 3, c - 3);
         const lv = pellets[x][y];
         if (!lv) continue;
@@ -170,19 +292,57 @@
         if (lv === 4) { ctx.beginPath(); ctx.arc(x * c + c / 2, y * c + c / 2, s / 1.6, 0, Math.PI * 2); ctx.fill(); }
         else ctx.fillRect(x * c + (c - s) / 2, y * c + (c - s) / 2, s, s);
       }
-      // Pac-Man
+
+      // Walls: thick rounded bars that join their neighbours, classic arcade style
+      const inset = c * 0.2;
+      ctx.fillStyle = `rgba(${themeRGB.accent3},0.75)`;
+      ctx.shadowColor = `rgba(${themeRGB.accent3},0.6)`; ctx.shadowBlur = 6;
+      for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) {
+        if (!walls[x][y]) continue;
+        ctx.beginPath(); ctx.roundRect(x * c + inset, y * c + inset, c - 2 * inset, c - 2 * inset, c * 0.18); ctx.fill();
+        if (x + 1 < cols && walls[x + 1][y]) ctx.fillRect(x * c + c - inset - 1, y * c + inset, 2 * inset + 2, c - 2 * inset);
+        if (y + 1 < rows && walls[x][y + 1]) ctx.fillRect(x * c + inset, y * c + c - inset - 1, c - 2 * inset, 2 * inset + 2);
+        // 2x2 blocks: fill the gap where four pieces meet
+        if (x + 1 < cols && y + 1 < rows && walls[x + 1][y] && walls[x][y + 1] && walls[x + 1][y + 1]) ctx.fillRect(x * c + c - inset - 1, y * c + c - inset - 1, 2 * inset + 2, 2 * inset + 2);
+      }
+      ctx.shadowBlur = 0;
+
+      // Power-up on the board (blinks before it disappears)
+      if (item && !(item.ttl < 2000 && Math.floor(t / 150) % 2)) {
+        const cx = item.x * c + c / 2, cy = item.y * c + c / 2, r = c * (0.42 + 0.05 * Math.sin(t / 180));
+        ctx.fillStyle = `rgba(${themeRGB.accent},0.18)`;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+        ctx.strokeStyle = `rgba(${themeRGB.accent},0.8)`; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.font = `${Math.round(c * 0.55)}px "JetBrains Mono", sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = item.type.id === 'life' ? '#ff4d6d' : '#fff';
+        ctx.fillText(item.type.icon, cx, cy + 1);
+      }
+
+      // Pac-Man, with a speed trail and a magnet ring when active
       const angle = Math.atan2(pac.dir[1], pac.dir[0]);
       const mouth = 0.08 + 0.28 * Math.abs(Math.sin(t / 90));
+      const pcx = pxf * c + c / 2, pcy = pyf * c + c / 2;
+      if (active.magnet) {
+        ctx.strokeStyle = `rgba(${rgb},${0.35 + 0.2 * Math.sin(t / 120)})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(pcx, pcy, c * 2.2, 0, 7); ctx.stroke();
+      }
+      if (active.speed) {
+        ctx.fillStyle = 'rgba(255,210,63,0.25)';
+        ctx.beginPath(); ctx.arc(pcx - pac.dir[0] * c * 0.5, pcy - pac.dir[1] * c * 0.5, c * 0.3, 0, 7); ctx.fill();
+      }
       ctx.fillStyle = '#ffd23f';
-      ctx.beginPath(); ctx.moveTo(pxf * c + c / 2, pyf * c + c / 2);
-      ctx.arc(pxf * c + c / 2, pyf * c + c / 2, c * 0.42, angle + mouth * Math.PI, angle - mouth * Math.PI + Math.PI * 2);
+      ctx.beginPath(); ctx.moveTo(pcx, pcy);
+      ctx.arc(pcx, pcy, c * 0.42, angle + mouth * Math.PI, angle - mouth * Math.PI + Math.PI * 2);
       ctx.fill();
+
       // Ghosts
+      const gk = Math.min(1, ghostAcc / GHOST_STEP);
       ghosts.forEach(gh => {
-        const [gx, gy] = lerp(gh), cx = gx * c + c / 2, top = gy * c + c * 0.12, r = c * 0.4;
-        const scared = fright && !gh.eaten;
-        ctx.globalAlpha = gh.eaten ? 0.35 : 1;
-        ctx.fillStyle = scared ? (fright < 12 && Math.floor(t / 120) % 2 ? '#ffffff' : '#3b5bdb') : gh.color;
+        const [gx, gy] = active.freeze ? [gh.x, gh.y] : lerp(gh, gk), cx = gx * c + c / 2, top = gy * c + c * 0.12, r = c * 0.4;
+        const scared = frightMs > 0 && !gh.eaten;
+        ctx.globalAlpha = gh.eaten && frightMs > 0 ? 0.35 : 1;
+        ctx.fillStyle = active.freeze ? '#a5d8ff' : scared ? (frightMs < 1800 && Math.floor(t / 120) % 2 ? '#ffffff' : '#3b5bdb') : gh.color;
         ctx.beginPath();
         ctx.arc(cx, top + r, r, Math.PI, 0);
         ctx.lineTo(cx + r, top + c * 0.82);
@@ -199,7 +359,7 @@
       ctx.restore();
     };
     g.rows = rows; g.cols = cols;
-    g.hint = 'Eat every contribution. Big dots are power pellets: eat the ghosts while they are blue. ' + (touch() ? 'Use the buttons or swipe to move.' : 'Arrows / WASD to move.');
+    g.hint = 'Eat every contribution. Big dots let you eat the ghosts. Grab power-ups: ⚡ speed, ❄ freeze, 🧲 magnet, ×2 points, ♥ life. ' + (touch() ? 'Use the buttons or swipe to move.' : 'Arrows / WASD to move.');
     return g;
   }
 
@@ -314,6 +474,7 @@
     view.camX = 0;
     Object.keys(keys).forEach(k => { keys[k] = false; });
     hud(0, 3);
+    $('gamePower').textContent = '';
     $('gameBest').textContent = store.get(kind + '-best', 0);
     $('gameTitle').textContent = TITLES[kind];
     $('gameHint').textContent = game.hint;

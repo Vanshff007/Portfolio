@@ -324,3 +324,4 @@ body.dev-mode::after{content:'DEV MODE · ↑↑↓↓←→←→BA to exit';po
   .heat-play,.game-pad button{cursor:auto;}
 }
 @media (max-width:600px){ .game-box{padding:1rem 0.8rem;} .game-hud{gap:0.8rem;} }
+.game-power{color:var(--text);font-size:0.78rem;letter-spacing:0.02em;text-transform:none;}

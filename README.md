@@ -21,7 +21,7 @@ An education, work and achievements timeline. The line draws itself as you scrol
 ### Activity
 - **GitHub:** contribution heatmap for the last year, streak, top languages and the latest commits.
 - **LeetCode:** solved count with an Easy / Medium / Hard ring, contest rating, top percentage, max streak and a submission heatmap for the last year.
-- **Play the graphs:** click the GitHub heatmap to play **Pac-Man** on it (contributions are pellets, the brightest ones are power pellets). Click the LeetCode heatmap to play a **Space Shooter** where each submission is an enemy block (brighter blocks take more hits). Keyboard and touch controls; best scores are saved.
+- **Play the graphs:** click the GitHub heatmap to play **Pac-Man** on it (contributions are pellets, the brightest ones are power pellets). The maze walls sit on empty days, and power-ups appear now and then: ⚡ speed, ❄ freeze ghosts, 🧲 magnet, ×2 points and ♥ extra life. Click the LeetCode heatmap to play a **Space Shooter** where each submission is an enemy block (brighter blocks take more hits). Keyboard and touch controls; best scores are saved.
 - **Currently:** what I'm building, learning and reading, plus Spotify "now playing" when the server is set up.
 
 ### Skills
