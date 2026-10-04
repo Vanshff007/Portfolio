@@ -45,7 +45,7 @@ const SITE = {
   },
 
   // Lighthouse scores shown in the footer. Re-run Lighthouse and update.
-  lighthouse: { performance: 88, accessibility: 100, bestPractices: 100, seo: 100 }, // live site, median of 3 runs (Oct 2026)
+  lighthouse: { performance: 98, accessibility: 100, bestPractices: 100, seo: 100 }, // live site, median of 3 runs (Oct 2026)
 };
 
 /* ── Journey timeline (oldest first, read top to bottom) ── */
