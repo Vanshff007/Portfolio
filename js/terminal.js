@@ -193,9 +193,9 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
         setTimeout(() => print('Verifying credentials… <span class="hl">ok</span>'), 400);
         setTimeout(() => print('Checking skills: React ✓ Node.js ✓ Socket.io ✓ DSA (505+ problems) ✓'), 900);
         setTimeout(() => {
-          print('<span class="hl">Access granted.</span> Vansh is now available for your team. 🎉\nOpening a draft email…');
+          print('<span class="hl">Access granted.</span> Vansh is now available for your team. 🎉\nOpening the contact form…');
           confetti(); sfx('success');
-          setTimeout(() => { dispatchEvent(new Event('mailto-open')); location.href = `mailto:${SITE.email}?subject=${encodeURIComponent("Let's work together")}`; }, 900);
+          setTimeout(() => goTo('contact'), 900);
         }, 1500);
         return;
       }
