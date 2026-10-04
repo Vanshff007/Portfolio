@@ -195,7 +195,7 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
         setTimeout(() => {
           print('<span class="hl">Access granted.</span> Vansh is now available for your team. 🎉\nOpening a draft email…');
           confetti(); sfx('success');
-          setTimeout(() => { location.href = `mailto:${SITE.email}?subject=${encodeURIComponent("Let's work together")}`; }, 900);
+          setTimeout(() => { dispatchEvent(new Event('mailto-open')); location.href = `mailto:${SITE.email}?subject=${encodeURIComponent("Let's work together")}`; }, 900);
         }, 1500);
         return;
       }

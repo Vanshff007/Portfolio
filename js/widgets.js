@@ -181,6 +181,7 @@ whenNear('activity', function () {
   const mini = document.getElementById('miniPlayer');
   let tracks = [], queue = [], current = null, controller = null, embedLoading = null;
   let playing = false, wantPlay = false, ended = false, announced = false;
+  let lastPos = 0, lastUpdate = 0, seekTo = 0, toggles = 0;
   const OFF_KEY = 'music-off';
   const isOff = () => { try { return sessionStorage.getItem(OFF_KEY) === '1'; } catch { return false; } };
   const setOff = v => { try { v ? sessionStorage.setItem(OFF_KEY, '1') : sessionStorage.removeItem(OFF_KEY); } catch {} };
@@ -233,7 +234,10 @@ whenNear('activity', function () {
         c.addListener('ready', () => { if (wantPlay) { wantPlay = false; c.play(); } });
         c.addListener('playback_update', e => {
           const { isPaused, isBuffering, position, duration } = e.data;
+          lastUpdate = Date.now();
           if (!isBuffering) {
+            if (!isPaused && seekTo) { c.seek(seekTo / 1000); seekTo = 0; }
+            lastPos = position;
             // Pausing in Spotify's own button counts too: no autostart again this visit
             if (playing && isPaused && position < duration - 800) setOff(true);
             if (!isPaused) setOff(false);
@@ -251,8 +255,10 @@ whenNear('activity', function () {
     return embedLoading;
   }
 
-  async function playTrack(t) {
+  // at: where to resume, in ms (used when the embed has to be reloaded)
+  async function playTrack(t, at = 0) {
     show(t);
+    seekTo = at;
     ended = false;
     mini.hidden = false;
     const fresh = !controller;
@@ -265,8 +271,29 @@ whenNear('activity', function () {
   function toggle() {
     if (!controller || mini.hidden) { setOff(false); playTrack(current); return; }
     setOff(playing); // pausing turns autostart off for this visit
+    const resuming = !playing, id = ++toggles;
     controller.togglePlay();
+    // A stalled embed ignores play; reload the song at the same spot instead
+    if (resuming) setTimeout(() => { if (id === toggles && !playing) playTrack(current, lastPos); }, 2500);
   }
+
+  // Opening a mailto: link hands off to the mail app, which can kill the embed's audio stream.
+  // If a song was playing, resume it once the visitor is back (also after they cancel).
+  function guardMailto() {
+    if (!playing || !controller) return;
+    const at = lastPos;
+    let done = false;
+    const check = () => {
+      // Paused, or no progress updates for a while: the stream has stopped
+      if (done || (playing && Date.now() - lastUpdate < 3000)) return;
+      done = true;
+      playTrack(current, at);
+    };
+    setTimeout(check, 2000);
+    addEventListener('focus', () => setTimeout(check, 500), { once: true });
+  }
+  addEventListener('click', e => { if (e.target.closest?.('a[href^="mailto:"]')) guardMailto(); }, true);
+  addEventListener('mailto-open', guardMailto);
   function next() { setOff(false); playTrack(nextTrack()); }
 
   cachedJSON('spotify-playlist-v2', url, 10 * 60 * 1000).then(d => {
