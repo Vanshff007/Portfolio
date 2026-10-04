@@ -62,18 +62,28 @@ function trackResume() {
 (function () {
   const list = document.getElementById('timeline');
   const fill = document.getElementById('timelineFill');
-  function update() {
-    const r = list.getBoundingClientRect();
-    const p = Math.min(1, Math.max(0, (innerHeight * 0.6 - r.top) / r.height));
-    fill.style.transform = `scaleY(${p})`;
-    list.querySelectorAll('.tl-item').forEach(item => {
-      const dot = item.getBoundingClientRect().top + 24;
-      item.classList.toggle('lit', dot < innerHeight * 0.6);
-    });
+  // Item offsets are cached when the layout changes, so each scroll frame reads
+  // one rect and then writes. Scroll work only runs while the timeline is on screen.
+  let items = [], offsets = [], onScreen = false, queued = false;
+  function measure() {
+    items = [...list.querySelectorAll('.tl-item')];
+    offsets = items.map(item => item.offsetTop); // untransformed, relative to the list
+    update();
   }
-  addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', update);
-  update();
+  function update() {
+    queued = false;
+    const r = list.getBoundingClientRect();
+    const line = innerHeight * 0.6;
+    fill.style.transform = `scaleY(${Math.min(1, Math.max(0, (line - r.top) / r.height))})`;
+    items.forEach((item, i) => item.classList.toggle('lit', r.top + offsets[i] + 24 < line));
+  }
+  function schedule() {
+    if (onScreen && !queued) { queued = true; requestAnimationFrame(update); }
+  }
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; update(); }).observe(list);
+  new ResizeObserver(measure).observe(list);
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', schedule);
 })();
 
 /* ── Section scrolling helper (used by palette and terminal) ── */
