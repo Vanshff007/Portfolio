@@ -115,13 +115,20 @@ function flash(msg) {
 /* ── Scroll progress, back-to-top ── */
 const progress = document.getElementById('scrollProgress');
 const toTop    = document.getElementById('toTop');
+// Page height is cached and refreshed only when the layout changes, so scrolling
+// and page load never force a synchronous layout just to read it
+let maxScroll = 0;
+function measure() {
+  maxScroll = document.documentElement.scrollHeight - innerHeight;
+  onScroll();
+}
 function onScroll() {
-  const max = document.documentElement.scrollHeight - innerHeight;
-  progress.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+  progress.style.transform = `scaleX(${maxScroll > 0 ? Math.min(1, scrollY / maxScroll) : 0})`;
   toTop.classList.toggle('show', scrollY > innerHeight * 0.8);
 }
 addEventListener('scroll', onScroll, { passive: true });
-onScroll();
+addEventListener('resize', measure);
+new ResizeObserver(measure).observe(document.body);
 toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
 
 /* ── Active nav link ── */
