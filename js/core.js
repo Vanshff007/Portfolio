@@ -336,3 +336,16 @@ document.querySelector('.btn-gmail').addEventListener('click', () => {
     }
   });
 })();
+
+/* ── Offline support: register the service worker (sw.js) once the page is idle ── */
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => (window.requestIdleCallback || setTimeout)(async () => {
+    try {
+      await navigator.serviceWorker.register('sw.js');
+      const reg = await navigator.serviceWorker.ready;
+      // Hand over the files this visit already loaded, so the site works offline next time
+      const urls = performance.getEntriesByType('resource').map(r => r.name).filter(u => u.startsWith(location.origin));
+      reg.active?.postMessage({ type: 'cache-urls', urls });
+    } catch {}
+  }));
+}
