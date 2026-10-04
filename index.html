@@ -11,6 +11,7 @@
   try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
 </script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
 <!-- Self-hosted fonts, fetched in parallel with the CSS so the hero text doesn't wait on a third party -->
 <link rel="preload" href="assets/fonts/syne-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -119,7 +120,8 @@
 <section id="hero">
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="grid-lines"></div>
-  <div class="hero-label">Full-Stack Developer · Open to Opportunities</div>
+  <div class="hire-pill"><span class="hire-dot" aria-hidden="true"></span><span>Open to SDE internships now and full-time roles from 2027</span><a href="mailto:vansh31082005@gmail.com?subject=Opportunity%20for%20Vansh">Email me →</a></div>
+  <div class="hero-label">Full-Stack Developer</div>
   <h1>Vansh<br><span class="outline">Minhas</span><br><span class="accent rotator" id="rotator">Builds.</span></h1>
   <p class="hero-sub">CS student at USICT (GGSIPU) crafting web apps that solve real-world problems — from real-time collaborative tools to scalable backend systems.</p>
   <div class="hero-ctas">

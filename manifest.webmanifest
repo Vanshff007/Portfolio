@@ -1,0 +1,13 @@
+{
+  "name": "Vansh Minhas | Full-Stack Developer",
+  "short_name": "vansh.dev",
+  "description": "Portfolio of Vansh Minhas: real-time web apps, AI/ML projects and live coding stats.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "icons": [
+    { "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
