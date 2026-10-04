@@ -129,7 +129,7 @@ section{padding:7rem 3rem;}
 .btn-dot:nth-child(2){animation-delay:0.15s;}
 .btn-dot:nth-child(3){animation-delay:0.3s;}
 @keyframes btnBounce{from{transform:translateY(0);}to{transform:translateY(-4px);}}
-footer{padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+footer{padding:2rem 6rem 2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 footer p{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;}.footer-accent{color:var(--accent);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 @keyframes heroUp{from{opacity:0.01;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
@@ -259,7 +259,7 @@ nav ul a:hover::after,nav ul a.active::after{transform:scaleX(1);}
   section{padding:5rem 1.25rem;}
   .about-grid,.contact-inner{grid-template-columns:1fr;gap:3rem;}
   .section-header{margin-bottom:2.5rem;}
-  footer{flex-direction:column;gap:0.5rem;padding:2rem 1.25rem;text-align:center;}
+  footer{flex-direction:column;gap:0.5rem;padding:2rem 1.25rem 6rem;text-align:center;}
   .hero-hint{display:none;}
 }
 .projects-grid{grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));}

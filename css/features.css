@@ -344,6 +344,13 @@ body.dev-mode::after{content:'DEV MODE · ↑↑↓↓←→←→BA to exit';po
 .mini-player button{flex:1;width:36px;border-radius:10px;border:1px solid rgba(30,215,96,0.4);background:rgba(var(--bg-rgb),0.9);backdrop-filter:blur(10px);color:#1ed760;font-size:0.75rem;cursor:inherit;}
 .mini-player button:hover{background:rgba(30,215,96,0.15);}
 .mini-player .mp-close{color:var(--muted);border-color:var(--border);}
+.mini-player .mp-icon{display:none;flex:none;width:52px;height:52px;border-radius:50%;font-size:1.3rem;box-shadow:0 10px 26px rgba(0,0,0,0.4);}
+.mini-player.min{width:auto;}
+.mini-player.min .mp-side{display:none;}
+.mini-player.min .mp-embed{position:absolute;left:0;bottom:0;width:min(360px,calc(100vw - 120px));opacity:0;pointer-events:none;}
+.mini-player.min .mp-icon{display:block;}
+.mini-player.min.playing .mp-icon{animation:mpPulse 2s infinite;}
+@keyframes mpPulse{0%{box-shadow:0 0 0 0 rgba(30,215,96,0.5);}70%{box-shadow:0 0 0 12px rgba(30,215,96,0);}100%{box-shadow:0 0 0 0 rgba(30,215,96,0);}}
 .pl-note{font-size:0.6rem;color:var(--muted);letter-spacing:0.05em;}
 @media (max-width:600px){ .mini-player{left:0.75rem;bottom:0.75rem;width:calc(100vw - 100px);} .pl-btns{width:100%;} .pl-btns .pl-shuffle{flex:1;} }
 @media (hover:none),(pointer:coarse){ .mini-player button,.pl-next{cursor:auto;} }

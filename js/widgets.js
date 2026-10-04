@@ -170,8 +170,9 @@ whenNear('activity', function () {
    on the page (loading it only then also keeps Spotify's cookies off page load).
    SITE.firstSong plays first, then the rest in random order. The embed lives in a
    floating mini player (Spotify only loads embeds that are on screen), so it
-   can be paused from anywhere; if the visitor pauses or closes it, it won't
-   autostart again this visit. Logged-out visitors hear 30-second previews.
+   can be paused from anywhere, and minimized to an icon without stopping it;
+   if the visitor pauses it, it won't autostart again this visit. Logged-out
+   visitors hear 30-second previews.
 ────────────────────────────────────────────────────────────────── */
 (function () {
   const url = apiURL('/api/playlist');
@@ -206,6 +207,7 @@ whenNear('activity', function () {
   function setPlaying(v) {
     playing = v;
     document.getElementById('plPlay').innerHTML = v ? '⏸ Pause' : '▶ Play';
+    mini.classList.toggle('playing', v);
     if (v && !announced) {
       announced = true;
       flash(`🎧 Playing "${current.title}" from my playlist. Pause anytime, bottom left.`);
@@ -289,13 +291,14 @@ whenNear('activity', function () {
     document.getElementById('plPlay').addEventListener('click', e => { e.stopPropagation(); toggle(); });
     document.getElementById('plNext').addEventListener('click', e => { e.stopPropagation(); next(); });
     mini.querySelector('.mp-next').addEventListener('click', e => { e.stopPropagation(); next(); });
-    mini.querySelector('.mp-close').addEventListener('click', e => {
-      e.stopPropagation();
-      setOff(true);
-      if (playing) controller?.togglePlay();
-      setPlaying(false);
-      mini.hidden = true;
-    });
+    // Minimizing keeps the music going; the icon brings the player back
+    const minimize = v => {
+      mini.classList.toggle('min', v);
+      try { v ? sessionStorage.setItem('player-min', '1') : sessionStorage.removeItem('player-min'); } catch {}
+    };
+    try { if (sessionStorage.getItem('player-min') === '1') mini.classList.add('min'); } catch {}
+    mini.querySelector('.mp-close').addEventListener('click', e => { e.stopPropagation(); minimize(true); });
+    mini.querySelector('.mp-icon').addEventListener('click', e => { e.stopPropagation(); minimize(false); });
 
     if (isOff()) return;
     // Start on the visitor's first interaction, which browsers allow to play sound
