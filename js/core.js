@@ -32,14 +32,14 @@ document.addEventListener('mouseover', e => {
   if (!e.target.closest(HOVER_SEL)) return;
   cursor.style.transform = 'translate(-50%,-50%) scale(2)';
   ring.style.borderColor = `rgba(${themeRGB.accent},0.8)`;
-  ring.style.scale = '1.39';
+  ring.style.width = ring.style.height = '50px';
 });
 document.addEventListener('mouseout', e => {
   const from = e.target.closest(HOVER_SEL);
   if (!from || (e.relatedTarget && from.contains(e.relatedTarget))) return;
   cursor.style.transform = 'translate(-50%,-50%) scale(1)';
   ring.style.borderColor = '';
-  ring.style.scale = '';
+  ring.style.width = ring.style.height = '36px';
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
