@@ -248,3 +248,12 @@ function confetti(count = 160) {
     }
   });
 })();
+
+/* ── Tab title while the visitor is on another tab ── */
+(function () {
+  const title = document.title;
+  const away = ['Hey, over here 👋', 'Still hiring? 👀', 'vansh.dev misses you', 'One tab away from a great hire'];
+  document.addEventListener('visibilitychange', () => {
+    document.title = document.hidden ? away[Math.floor(Math.random() * away.length)] : title;
+  });
+})();
