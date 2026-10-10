@@ -1,17 +1,26 @@
 /* ── Themes ── */
 const THEMES = ['dark', 'light', 'dracula', 'matrix', 'sunset'];
-function setTheme(name) {
-  if (!THEMES.includes(name)) return false;
-  // Raw string (not JSON): the inline <head> script reads it before first paint
-  try { localStorage.setItem('theme', name); } catch {}
+function applyTheme(name) {
   withTransition(() => {
     if (name === 'dark') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = name;
     document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
     document.dispatchEvent(new CustomEvent('themechange', { detail: name }));
   });
+}
+function setTheme(name) {
+  if (!THEMES.includes(name)) return false;
+  // Raw string (not JSON): the inline <head> script reads it before first paint
+  try { localStorage.setItem('theme', name); } catch {}
+  applyTheme(name);
   return true;
 }
+// Until the visitor picks a theme, follow the system's light/dark setting as it changes
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch {}
+  if (!saved) applyTheme(e.matches ? 'light' : 'dark');
+});
 const currentTheme = () => document.documentElement.dataset.theme || 'dark';
 document.getElementById('themeBtn').addEventListener('click', () => {
   const next = THEMES[(THEMES.indexOf(currentTheme()) + 1) % THEMES.length];

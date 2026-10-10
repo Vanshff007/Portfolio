@@ -7,8 +7,16 @@
 <meta name="description" content="Vansh Minhas: full-stack developer and CS student at USICT (GGSIPU). Real-time web apps, AI/ML projects, 505+ LeetCode problems.">
 <meta name="theme-color" content="#0a0a0f">
 <script>
-  // Apply the saved theme before first paint, so there is no flash
-  try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  // Apply the theme before first paint, so there is no flash: the saved one,
+  // or the system's light/dark setting when the visitor has not picked one
+  (function () {
+    let t = null;
+    try { t = localStorage.getItem('theme'); } catch {}
+    t = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if (t === 'dark') return;
+    document.documentElement.dataset.theme = t;
+    if (t === 'light') document.querySelector('meta[name="theme-color"]').content = '#f6f5f0';
+  })();
 </script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
