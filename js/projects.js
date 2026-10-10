@@ -88,10 +88,19 @@ let PROJECTS = [];
   // Exposed so the skills graph can highlight matching cards
   window.filterProjects = function (cat, names) {
     bar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-    grid.querySelectorAll('.project-card').forEach(card => {
+    const cards = [...grid.querySelectorAll('.project-card')];
+    const apply = () => cards.forEach(card => {
       const show = names ? names.includes(card.dataset.name) : cat === 'All' || card.dataset.category === cat;
       card.classList.toggle('hide', !show);
-      if (show) { card.classList.remove('card-enter'); void card.offsetWidth; card.classList.add('card-enter'); }
+      card.classList.remove('card-enter');
+    });
+    if (withTransition(apply)) return;
+    // No view transitions: replay the entrance, 60ms apart in visible order
+    let n = 0;
+    cards.filter(card => !card.classList.contains('hide')).forEach(card => {
+      card.style.animationDelay = Math.min(n++, 8) * 0.06 + 's';
+      void card.offsetWidth;
+      card.classList.add('card-enter');
     });
   };
 
@@ -101,7 +110,7 @@ let PROJECTS = [];
     buildFilters();
     status.innerHTML = `● ${PROJECTS.length} repos synced from <a href="https://github.com/${GH_USER}" target="_blank" rel="noopener noreferrer">github.com/${GH_USER}</a>${fromCache ? ' (cached)' : ''}`;
     // Keep the About stat in sync with the real project count
-    const stat = document.querySelector('.stat-val[data-count]');
+    const stat = document.getElementById('statProjects');
     if (stat) { stat.dataset.count = PROJECTS.length; stat.dataset.suffix = ''; stat.textContent = PROJECTS.length; }
     document.dispatchEvent(new CustomEvent('projects:ready'));
   }

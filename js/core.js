@@ -32,14 +32,14 @@ document.addEventListener('mouseover', e => {
   if (!e.target.closest(HOVER_SEL)) return;
   cursor.style.transform = 'translate(-50%,-50%) scale(2)';
   ring.style.borderColor = `rgba(${themeRGB.accent},0.8)`;
-  ring.style.width = ring.style.height = '50px';
+  ring.style.scale = '1.39';
 });
 document.addEventListener('mouseout', e => {
   const from = e.target.closest(HOVER_SEL);
   if (!from || (e.relatedTarget && from.contains(e.relatedTarget))) return;
   cursor.style.transform = 'translate(-50%,-50%) scale(1)';
   ring.style.borderColor = '';
-  ring.style.width = ring.style.height = '36px';
+  ring.style.scale = '';
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -75,10 +75,26 @@ function countUp(el) {
   })(start);
 }
 
+/* ── Crossfade a DOM change where the browser supports view transitions ── */
+function withTransition(update) {
+  if (reduceMotion || !document.startViewTransition) { update(); return false; }
+  document.startViewTransition(update);
+  return true;
+}
+
 /* ── Scroll reveal ── */
+const STAGGER = 0.06;
 const revealObs = new IntersectionObserver(entries => {
+  let n = 0;
   entries.forEach(e => {
     if (!e.isIntersecting) return;
+    // Elements that enter together reveal 60ms apart, unless they set their own delay.
+    // The delay is removed afterwards so it does not slow their hover transitions.
+    const el = e.target, delay = n++ * STAGGER;
+    if (delay && !el.style.transitionDelay) {
+      el.style.transitionDelay = delay + 's';
+      setTimeout(() => { el.style.transitionDelay = ''; }, delay * 1000 + 800);
+    }
     e.target.classList.add('visible');
     e.target.querySelectorAll('.section-title').forEach(scramble);
     e.target.querySelectorAll('[data-count]').forEach(countUp);
@@ -93,9 +109,9 @@ function observeReveal(root) { root.querySelectorAll('.reveal:not(.visible)').fo
 const sbObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
-      const t = e.target, w = t.style.width;
-      t.style.width = '0';
-      setTimeout(() => { t.style.width = w; }, 100);
+      const t = e.target, w = t.style.transform;
+      t.style.transform = 'scaleX(0)';
+      setTimeout(() => { t.style.transform = w; }, 100);
       sbObs.unobserve(t);
     }
   });
@@ -192,8 +208,20 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
     }));
   }
 
+  // Lines are grouped into a few opacity steps and stroked once per step,
+  // instead of one stroke() call per line
+  const STEPS = 6;
+  const step = (d, max) => Math.min(STEPS - 1, Math.floor((1 - d / max) * STEPS));
+  function strokeSteps(paths, rgb, maxAlpha) {
+    paths.forEach((path, i) => {
+      ctx.strokeStyle = `rgba(${rgb},${maxAlpha * (i + 0.5) / STEPS})`;
+      ctx.stroke(path);
+    });
+  }
+
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = `rgba(${themeRGB.accent},0.55)`;
     for (const p of pts) {
       if (!still) {
         // gentle push away from the cursor
@@ -206,23 +234,26 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
         if (p.x < 0 || p.x > W) p.vx *= -1;
         if (p.y < 0 || p.y > H) p.vy *= -1;
       }
-      ctx.fillStyle = `rgba(${themeRGB.accent},0.55)`;
       ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
     }
+    const links = Array.from({ length: STEPS }, () => new Path2D());
+    const rays  = Array.from({ length: STEPS }, () => new Path2D());
     for (let a = 0; a < pts.length; a++) {
       for (let b = a + 1; b < pts.length; b++) {
         const dx = pts[a].x - pts[b].x, dy = pts[a].y - pts[b].y, d = dx * dx + dy * dy;
         if (d < 13000) {
-          ctx.strokeStyle = `rgba(${themeRGB.accent3},${0.22 * (1 - d / 13000)})`;
-          ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+          const path = links[step(d, 13000)];
+          path.moveTo(pts[a].x, pts[a].y); path.lineTo(pts[b].x, pts[b].y);
         }
       }
       const dx = pts[a].x - mouse.x, dy = pts[a].y - mouse.y, d = dx * dx + dy * dy;
       if (d < 26000) {
-        ctx.strokeStyle = `rgba(${themeRGB.accent},${0.35 * (1 - d / 26000)})`;
-        ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+        const path = rays[step(d, 26000)];
+        path.moveTo(pts[a].x, pts[a].y); path.lineTo(mouse.x, mouse.y);
       }
     }
+    strokeSteps(links, themeRGB.accent3, 0.22);
+    strokeSteps(rays, themeRGB.accent, 0.35);
     if (running && !still) requestAnimationFrame(draw);
   }
 
@@ -244,17 +275,34 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
 })();
 
 /* ── Project card tilt + spotlight ── */
+// Pointer effects measure their element once per hover, not on every mousemove.
+// A scroll or resize moves the element, so it bumps rectGen to force a re-measure.
+let rectGen = 0;
+addEventListener('scroll', () => { rectGen++; }, { passive: true });
+addEventListener('resize', () => { rectGen++; });
+// Calls apply(x, y, rect) at most once per frame while the pointer moves over el
+function trackPointer(el, apply, reset) {
+  let r, gen = -1, px = 0, py = 0, raf = 0;
+  el.addEventListener('mousemove', e => {
+    if (gen !== rectGen) { r = el.getBoundingClientRect(); gen = rectGen; }
+    px = e.clientX - r.left; py = e.clientY - r.top;
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; apply(px, py, r); });
+  });
+  el.addEventListener('mouseleave', () => {
+    cancelAnimationFrame(raf); raf = 0; gen = -1;
+    reset();
+  });
+}
+
 function bindTilt(card) {
   if (!finePointer || reduceMotion) return;
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  trackPointer(card, (px, py, r) => {
+    const x = px / r.width, y = py / r.height;
     card.style.setProperty('--mx', x * 100 + '%');
     card.style.setProperty('--my', y * 100 + '%');
     card.style.transition = 'border-color 0.3s, transform 0.08s';
     card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 8}deg) rotateY(${(x - 0.5) * 8}deg) translateY(-4px)`;
-  });
-  card.addEventListener('mouseleave', () => {
+  }, () => {
     card.style.transition = '';
     card.style.transform = '';
   });
@@ -264,12 +312,9 @@ document.querySelectorAll('.project-card').forEach(bindTilt);
 if (finePointer && !reduceMotion) {
   /* ── Magnetic buttons ── */
   document.querySelectorAll('.hero-ctas .btn, #submit-btn').forEach(btn => {
-    btn.addEventListener('mousemove', e => {
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
-      btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
-    });
-    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    trackPointer(btn, (px, py, r) => {
+      btn.style.transform = `translate(${(px - r.width / 2) * 0.2}px, ${(py - r.height / 2) * 0.26}px)`;
+    }, () => { btn.style.transform = ''; });
   });
 }
 

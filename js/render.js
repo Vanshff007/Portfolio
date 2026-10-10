@@ -20,7 +20,7 @@ document.getElementById('skillsBars').innerHTML = SKILL_GROUPS.map((g, i) => `
     <div class="skill-group-title">${esc(g.name)}</div>
     ${g.skills.map(([name, pct]) => `
       <div class="skill-item" data-skill="${esc(name)}"><span class="skill-name">${esc(name)}</span>
-        <div class="skill-right"><span class="skill-pct">${pct}%</span><div class="skill-bar-wrap"><div class="skill-bar" style="width:${pct}%"></div></div></div>
+        <div class="skill-right"><span class="skill-pct">${pct}%</span><div class="skill-bar-wrap"><div class="skill-bar" style="transform:scaleX(${pct / 100})"></div></div></div>
       </div>`).join('')}
   </div>`).join('');
 
