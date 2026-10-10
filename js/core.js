@@ -18,7 +18,7 @@ let mx = 0, my = 0, rx = 0, ry = 0, cursorRaf = 0;
 // so touch devices (cursor hidden) and an idle mouse cost nothing per frame
 function animCursor() {
   cursor.style.translate = `${mx}px ${my}px`;
-  rx += (mx - rx) * 0.22; ry += (my - ry) * 0.22;
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
   ring.style.translate = `${rx}px ${ry}px`;
   cursorRaf = Math.abs(mx - rx) + Math.abs(my - ry) > 0.5 ? requestAnimationFrame(animCursor) : 0;
 }
