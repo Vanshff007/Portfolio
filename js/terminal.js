@@ -89,6 +89,7 @@ Run <span class="hl">open ${i + 1}</span> to launch, or <span class="hl">case ${
 ${SITE.apiBase ? '  <span class="hl">ask</span> &lt;question&gt; ask the AI about me\n' : ''}<span class="hl2">fun</span>
   <span class="hl">snake</span>         play snake            <span class="hl">typing</span>  typing speed test
   <span class="hl">pacman</span>        Pac-Man on my GitHub graph   <span class="hl">shooter</span>  shoot my LeetCode graph
+  <span class="hl">matrix</span>, <span class="hl">hack</span>, <span class="hl">vim</span>            <span class="hl">achievements</span>  secrets you have found
   <span class="hl">theme</span> [name]  ${THEMES.join(' | ')}
   <span class="hl">sound</span> on|off  <span class="hl">sudo hire-vansh</span>   <span class="hl">whoami</span>, <span class="hl">date</span>, <span class="hl">echo</span>, <span class="hl">history</span>, <span class="hl">clear</span>, <span class="hl">exit</span>`),
     about: () => print(
@@ -195,6 +196,7 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
         setTimeout(() => {
           print('<span class="hl">Access granted.</span> Vansh is now available for your team. 🎉\nOpening the contact form…');
           confetti(); sfx('success');
+          foundSecret('hire');
           setTimeout(() => goTo('contact'), 900);
         }, 1500);
         return;
@@ -245,10 +247,83 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
     pacman: () => { close(); setTimeout(() => window.playHeatmapGame?.('pacman'), 200); },
     shooter: () => { close(); setTimeout(() => window.playHeatmapGame?.('shooter'), 200); },
     typing: () => window.GAMES?.typing(term),
+    achievements: () => {
+      print(`<span class="hl2">secrets</span>  ${foundSecrets.length}/${SECRET_IDS.length} found · player level ${BASE_LEVEL + foundSecrets.length}`);
+      SECRET_IDS.forEach(id => {
+        const [name, hint] = SECRETS[id];
+        print(foundSecrets.includes(id) ? `  <span class="hl">✓ ${esc(name)}</span>` : `  <span class="dim">☐ ???  ${esc(hint)}</span>`);
+      });
+    },
+    rm: args => {
+      if (!(args.includes('/') && args.some(a => /^-\w*r\w*$/.test(a)))) return err('rm: permission denied. (you would need something more reckless)');
+      const targets = ['/home/vansh/projects', '/home/vansh/skills', '/home/vansh/resume.pdf', '/usr/bin/chai', '/'];
+      targets.forEach((t, i) => setTimeout(() => print(`removed '${t}'`), i * 220));
+      setTimeout(() => { close(); fakeWipe(); foundSecret('rm'); }, targets.length * 220 + 300);
+    },
+    vim: () => {
+      // A terminal program: it owns the keyboard, and only :q! gets out
+      const screen = print(`~
+~              VIM - Vi IMproved
+~
+~        type  :q&lt;Enter&gt;  to exit (allegedly)
+~
+~`);
+      const status = print('-- NORMAL --', 'cmd');
+      let cmd = null, tries = 0;
+      const fail = msg => { status.innerHTML = `<span class="hl2">${msg}</span>${++tries >= 5 ? '   <span class="dim">hint: the editor wants to be forced. :q!</span>' : ''}`; cmd = null; };
+      const prog = {
+        trap: true, // Escape and Ctrl+C go to the program instead of stopping it
+        key(e) {
+          if (e.key === 'Escape') return fail('-- NORMAL --  Esc will not save you.');
+          if (cmd === null) {
+            if (e.key === ':') { cmd = ':'; status.textContent = cmd; }
+            else if (e.key.length === 1) fail('E492: Not an editor command. Try a colon.');
+            return;
+          }
+          if (e.key === 'Backspace') cmd = cmd.slice(0, -1) || null;
+          else if (e.key.length === 1) cmd += e.key;
+          else if (e.key === 'Enter') {
+            if (cmd === ':q!') {
+              prog.stop();
+              print('You escaped vim. Few do.');
+              foundSecret('vim');
+            } else if (/^:(q|wq|x|w|qa)$/.test(cmd)) fail('E37: No write since last change (add ! to override)');
+            else fail(`E492: Not an editor command: ${esc(cmd.slice(1))}`);
+            return;
+          }
+          status.textContent = cmd ?? '-- NORMAL --';
+        },
+        stop() { screen.remove(); status.remove(); },
+      };
+      term.run(prog);
+    },
+    matrix: () => { close(); setTimeout(matrixRain, 200); foundSecret('matrix'); },
+    hack: () => {
+      const steps = ['Bypassing firewall', 'Cracking 2048-bit chai', 'Downloading more RAM', 'Accessing mainframe'];
+      steps.forEach((label, s) => {
+        setTimeout(() => {
+          const line = print('');
+          let pct = 0;
+          const timer = setInterval(() => {
+            pct = Math.min(100, pct + 10 + Math.floor(Math.random() * 15));
+            const fill = Math.round(pct / 5);
+            line.innerHTML = `${label.padEnd(24)}[<span class="hl">${'#'.repeat(fill)}</span>${'.'.repeat(20 - fill)}] ${pct}%`;
+            if (pct === 100) clearInterval(timer);
+          }, 70);
+        }, s * 750);
+      });
+      setTimeout(() => {
+        print(`<span class="hl">ACCESS GRANTED.</span> 1 classified file found: resume.pdf
+Run <span class="hl">resume</span> to exfiltrate it.`);
+        foundSecret('hack');
+      }, steps.length * 750 + 300);
+    },
     man:    ([c]) => c && COMMANDS[c] ? print(`${esc(c)}: see <span class="hl">help</span> — this shell is too small for man pages.`) : err('What manual page do you want?'),
   };
   COMMANDS.dir = COMMANDS.ls;
   COMMANDS.cls = COMMANDS.clear;
+  COMMANDS.vi = COMMANDS.vim;
+  COMMANDS.secrets = COMMANDS.achievements;
 
   function run(raw) {
     const line = raw.trim();
@@ -311,7 +386,7 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
   overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
   document.addEventListener('keydown', e => {
     if (program && overlay.classList.contains('open')) {
-      if (e.key === 'Escape' || (e.ctrlKey && e.key.toLowerCase() === 'c')) { e.preventDefault(); program.stop(); return; }
+      if (!program.trap && (e.key === 'Escape' || (e.ctrlKey && e.key.toLowerCase() === 'c'))) { e.preventDefault(); program.stop(); return; }
       if (program.key(e) !== false) e.preventDefault();
       return;
     }

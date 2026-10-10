@@ -235,6 +235,7 @@ function confetti(count = 160) {
       confetti();
       sfx('success');
       flash(on ? '↑↑↓↓←→←→BA — dev mode unlocked. Layout grid visible.' : 'Dev mode off.');
+      foundSecret('konami');
     }
   });
 })();

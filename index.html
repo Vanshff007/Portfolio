@@ -140,12 +140,12 @@
     <div class="section-line"></div>
   </div>
   <!-- Player card: portrait on the left, stats on the right -->
-  <div class="player-card reveal">
-    <div class="player-portrait"><img src="assets/avatar.jpg" alt="Illustrated portrait of Vansh Minhas" width="720" height="720" loading="lazy" decoding="async"></div>
+  <div class="player-card reveal" id="playerCard">
+    <div class="player-portrait" id="playerPortrait"><img src="assets/avatar.jpg" alt="Illustrated portrait of Vansh Minhas" width="720" height="720" loading="lazy" decoding="async"></div>
     <div class="player-info">
-      <div class="player-top"><span>Player 1</span><span>New Delhi, IN <b title="4th year, B.Tech">LVL 4</b></span></div>
+      <div class="player-top"><span>Player 1</span><span>New Delhi, IN <b id="playerLvl">LVL 4</b></span></div>
       <div class="about-name">Vansh Minhas</div>
-      <div class="about-role">Class: Full-Stack Developer</div>
+      <div class="about-role" id="playerRole">Class: Full-Stack Developer</div>
       <div class="player-block">
         <div class="player-label">Inventory</div>
         <dl class="player-inv">
@@ -376,7 +376,7 @@
 </main>
 
 <footer>
-  <p>© 2026 <span class="footer-accent">Vansh Minhas</span> · Built with intention · <span id="footVisits"></span></p>
+  <p>© 2026 <span class="footer-accent">Vansh Minhas</span> · Built with intention · <span id="footVisits"></span><span id="footSecret" hidden> · You scrolled all the way. Hire me already.</span></p>
   <div class="footer-right">
     <a class="lh-badge" id="lhBadge" href="https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fvanshff007.github.io%2FPortfolio%2F" target="_blank" rel="noopener noreferrer" hidden></a>
     <button class="icon-btn" id="soundBtn" aria-pressed="false" title="Toggle sound effects">♪ <span>off</span></button>
@@ -388,6 +388,7 @@
 <script src="js/core.js" defer></script>
 <script src="js/projects.js" defer></script>
 <script src="js/ui.js" defer></script>
+<script src="js/eggs.js" defer></script>
 <script src="js/terminal.js" defer></script>
 <script src="js/games.js" defer></script>
 <script src="js/widgets.js" defer></script>

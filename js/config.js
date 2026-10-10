@@ -7,6 +7,8 @@ const SITE = {
   name: 'Vansh Minhas',
   email: 'vansh31082005@gmail.com',
   resume: 'assets/resume.pdf',
+  // Optional 'MM-DD'. On that day the site shows a birthday greeting (see eggs.js)
+  birthday: '08-31',
   links: {
     github:   'https://github.com/Vanshff007',
     linkedin: 'https://www.linkedin.com/in/vansh-minhas-913b1a291/',
