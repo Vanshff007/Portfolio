@@ -24,7 +24,6 @@ const BONUS = {
   ready:     ['Player 1 ready',   'Hold the pointer on the name in the player card.'],
   saveimg:   ['Flattered',        'Right-click the portrait.'],
   drop:      ['Gravity',          'Click my first name in the hero three times.'],
-  circle:    ['Going in circles', 'Draw circles with the mouse.'],
   maxskill:  ['Maxed out',        'Click one skill bar until it gives up.'],
   selectall: ['Copycat',          'Select everything on the page.'],
   night:     ['Night owl',        'Visit after midnight.'],
@@ -236,30 +235,6 @@ function foundSecret(id) {
     busy = true;
     el.innerHTML = [...text].map((ch, i) => `<span class="drop-letter" style="animation-delay:${i * 70}ms">${esc(ch)}</span>`).join('');
     setTimeout(() => { el.textContent = text; busy = false; }, 1700 + text.length * 70);
-  });
-})();
-
-/* ── Draw two circles with the mouse: the cursor ring spins ── */
-if (finePointer) (function () {
-  let px, py, heading = null, turned = 0, lastT = 0;
-  document.addEventListener('mousemove', e => {
-    if (px === undefined || e.timeStamp - lastT > 250) { px = e.clientX; py = e.clientY; heading = null; turned = 0; lastT = e.timeStamp; return; }
-    const dx = e.clientX - px, dy = e.clientY - py;
-    if (dx * dx + dy * dy < 144) return; // one sample per 12px of travel
-    const h = Math.atan2(dy, dx);
-    if (heading !== null) {
-      const d = Math.atan2(Math.sin(h - heading), Math.cos(h - heading)); // turn since the last sample, -π to π
-      // Turning the same way adds up. A clear turn the other way starts over; small wobbles are ignored.
-      if (turned && Math.sign(d) !== Math.sign(turned)) { if (Math.abs(d) > 0.5) turned = d; }
-      else turned += d;
-    }
-    heading = h; px = e.clientX; py = e.clientY; lastT = e.timeStamp;
-    if (Math.abs(turned) < Math.PI * 4) return;
-    turned = 0;
-    ring.classList.add('spin');
-    ring.addEventListener('animationend', () => ring.classList.remove('spin'), { once: true });
-    if (reduceMotion) setTimeout(() => ring.classList.remove('spin'), 1000);
-    foundSecret('circle');
   });
 })();
 
