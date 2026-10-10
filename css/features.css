@@ -364,7 +364,6 @@ body.dev-mode::after{content:'DEV MODE · ↑↑↓↓←→←→BA to exit';po
 .secret-toast{position:fixed;top:5.5rem;left:50%;transform:translate(-50%,-16px);max-width:calc(100vw - 32px);background:var(--text);color:var(--bg);font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;text-align:center;padding:0.7rem 1.1rem;box-shadow:4px 4px 0 rgba(var(--accent-rgb),0.6);z-index:9997;opacity:0;pointer-events:none;transition:opacity 0.3s,transform 0.3s;}
 .secret-toast.show{opacity:1;transform:translate(-50%,0);}
 .secret-toast b{opacity:0.6;margin-left:0.5rem;}
-#footSecret{color:var(--accent);}
 /* Player card: all secrets found */
 .player-card.legendary{border-color:#f5c542;}
 .player-card.legendary::before{background:linear-gradient(#f5c542,#ff9d2e);}

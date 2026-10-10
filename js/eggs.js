@@ -12,9 +12,7 @@ const SECRETS = {
   portrait: ['Poke the portrait',  'The portrait does not like being poked. Five times.'],
   logo:     ['Party mode',         'The logo counts your clicks. Seven is lucky.'],
   vansh:    ['Say my name',        'Type my first name anywhere on the page.'],
-  tab:      ['Come back',          'Leave this tab, then return.'],
   idle:     ['Idle walker',        'Do nothing for a minute.'],
-  bottom:   ['The very bottom',    'Scroll until there is nothing left.'],
   rm:       ['rm -rf /',           'Try to delete everything from the terminal.'],
   vim:      ['Escaped vim',        'Open the editor nobody can exit. Then exit it.'],
   matrix:   ['Enter the matrix',   'A terminal command named after a 1999 film.'],
@@ -147,15 +145,6 @@ function foundSecret(id) {
   });
 })();
 
-/* ── Tab title while the visitor is away ── */
-(function () {
-  const title = document.title;
-  document.addEventListener('visibilitychange', () => {
-    document.title = document.hidden ? 'Come back 👀' : title;
-    if (!document.hidden) foundSecret('tab');
-  });
-})();
-
 /* ── Idle for a minute: a small character walks across the bottom ── */
 (function () {
   const IDLE = 60000;
@@ -176,14 +165,6 @@ function foundSecret(id) {
     setTimeout(check, Math.max(1000, IDLE - (Date.now() - last)));
   })();
 })();
-
-/* ── Scrolled to the very bottom ── */
-new IntersectionObserver(([e], o) => {
-  if (!e.isIntersecting) return;
-  o.disconnect();
-  document.getElementById('footSecret').hidden = false;
-  foundSecret('bottom');
-}, { threshold: 0.9 }).observe(document.querySelector('footer'));
 
 /* ── Player card: tag combo, inventory flip, name hold ── */
 (function () {
