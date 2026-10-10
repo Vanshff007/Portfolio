@@ -2,12 +2,14 @@
 const THEMES = ['dark', 'light', 'dracula', 'matrix', 'sunset'];
 function setTheme(name) {
   if (!THEMES.includes(name)) return false;
-  if (name === 'dark') delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = name;
   // Raw string (not JSON): the inline <head> script reads it before first paint
   try { localStorage.setItem('theme', name); } catch {}
-  document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  document.dispatchEvent(new CustomEvent('themechange', { detail: name }));
+  withTransition(() => {
+    if (name === 'dark') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = name;
+    document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+    document.dispatchEvent(new CustomEvent('themechange', { detail: name }));
+  });
   return true;
 }
 const currentTheme = () => document.documentElement.dataset.theme || 'dark';

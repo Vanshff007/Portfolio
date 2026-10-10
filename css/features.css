@@ -10,12 +10,17 @@ body{transition:background-color 0.3s,color 0.3s;}
 
 /* ════════ Section numbers via CSS counters (hidden sections are skipped) ════════ */
 main{counter-reset:sec;}
-.section-num::before{counter-increment:sec;content:counter(sec,decimal-leading-zero) " //";}
+/* Sections below the hero skip rendering until they are near the viewport. That adds style
+   containment, which scopes counters, so the increment sits on the section, not inside it */
+main>section:not(#hero){counter-increment:sec;content-visibility:auto;contain-intrinsic-size:auto 900px;}
+.section-num::before{content:counter(sec,decimal-leading-zero) " //";}
+/* Theme switch and project filter crossfade (see withTransition in core.js) */
+::view-transition-old(root),::view-transition-new(root){animation-duration:0.25s;}
 section[hidden]{display:none;}
 body.no-scroll{overflow:hidden;}
 
 /* ════════ Nav additions ════════ */
-.icon-btn{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.75rem;padding:0.38rem 0.6rem;cursor:inherit;transition:all 0.2s;}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.75rem;padding:0.38rem 0.6rem;cursor:inherit;transition:border-color 0.2s,color 0.2s;}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 .icon-btn[aria-pressed="true"]{color:var(--accent);border-color:rgba(var(--accent-rgb),0.4);}
 .nav-right{gap:1rem;}
@@ -46,7 +51,7 @@ nav ul{gap:1.5rem;}
 .modal-overlay.open{opacity:1;pointer-events:auto;visibility:visible;}
 .modal{position:relative;width:min(820px,100%);background:var(--surface);border:1px solid rgba(var(--accent-rgb),0.2);padding:2.5rem;transform:translateY(24px);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));}
 .modal-overlay.open .modal{transform:none;}
-.modal-close{position:absolute;top:1rem;right:1.4rem;background:none;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;font-size:0.85rem;cursor:inherit;transition:all 0.2s;}
+.modal-close{position:absolute;top:1rem;right:1.4rem;background:none;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;font-size:0.85rem;cursor:inherit;transition:border-color 0.2s,color 0.2s;}
 .modal-close:hover{color:var(--accent);border-color:var(--accent);}
 .modal-kicker{font-size:0.62rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.8rem;}
 .modal-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.03em;line-height:1;margin-bottom:1rem;padding-right:2.5rem;}
@@ -81,7 +86,7 @@ nav ul{gap:1.5rem;}
 .tl-item{position:relative;width:50%;padding:0 2.5rem 2.5rem;}
 .tl-item.left{left:0;text-align:right;}
 .tl-item.right{left:50%;}
-.tl-dot{position:absolute;top:1.4rem;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--muted);transition:all 0.4s;z-index:1;}
+.tl-dot{position:absolute;top:1.4rem;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--muted);transition:background-color 0.4s,border-color 0.4s,box-shadow 0.4s;z-index:1;}
 .tl-item.left .tl-dot{right:-7px;}
 .tl-item.right .tl-dot{left:-7px;}
 .tl-item.lit .tl-dot{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 6px rgba(var(--accent-rgb),0.15);}
@@ -284,7 +289,7 @@ body.dev-mode::after{content:'DEV MODE · ↑↑↓↓←→←→BA to exit';po
 /* ════════ Heatmap games ════════ */
 #heatmap,#lcHeatmap{cursor:inherit;}
 .heatmap-wrap:hover .heatmap{filter:brightness(1.15);}
-.heat-play{background:none;border:1px solid rgba(var(--accent-rgb),0.4);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.06em;padding:0.4rem 0.75rem;cursor:inherit;transition:all 0.2s;min-height:28px;}
+.heat-play{background:none;border:1px solid rgba(var(--accent-rgb),0.4);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.06em;padding:0.4rem 0.75rem;cursor:inherit;transition:background-color 0.2s,color 0.2s;min-height:28px;}
 .heat-play:hover{background:var(--accent);color:var(--on-accent);}
 .heat-play.lc{border-color:rgba(255,161,22,0.45);color:#ffa116;}
 .heat-play.lc:hover{background:#ffa116;color:#1a0d00;}

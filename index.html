@@ -139,26 +139,35 @@
     <h2 class="section-title">About Me</h2>
     <div class="section-line"></div>
   </div>
-  <div class="about-grid">
-    <div class="about-card reveal">
-      <div class="about-avatar">VM</div>
+  <!-- Player card: portrait on the left, stats on the right -->
+  <div class="player-card reveal">
+    <div class="player-portrait"><img src="assets/avatar.jpg" alt="Illustrated portrait of Vansh Minhas" width="720" height="720" loading="lazy" decoding="async"></div>
+    <div class="player-info">
+      <div class="player-top"><span>Player 1</span><span>New Delhi, IN <b title="4th year, B.Tech">LVL 4</b></span></div>
       <div class="about-name">Vansh Minhas</div>
-      <div class="about-role">Full-Stack Developer</div>
-      <div class="about-tags">
-        <span class="tag">React</span><span class="tag">Node.js</span>
-        <span class="tag">Socket.io</span><span class="tag">MongoDB</span>
-        <span class="tag">Python</span><span class="tag">TensorFlow</span>
+      <div class="about-role">Class: Full-Stack Developer</div>
+      <div class="player-block">
+        <div class="player-label">Inventory</div>
+        <dl class="player-inv">
+          <div><dt>CodeArena</dt><dd>Real-time 1v1</dd></div>
+          <div><dt>Projects shipped</dt><dd id="statProjects" data-count="7" data-suffix="+">7+</dd></div>
+          <div><dt>Paint Together</dt><dd>Live on Render</dd></div>
+          <div><dt>LeetCode</dt><dd data-count="505" data-suffix="+ solved">505+ solved</dd></div>
+          <div><dt>RAG Application</dt><dd>PDF · TXT · DOCX</dd></div>
+          <div><dt>Contest rating</dt><dd data-count="1743">1743</dd></div>
+        </dl>
       </div>
-    </div>
-    <div class="reveal" style="transition-delay:0.15s">
-      <div class="about-text">
-        <p>I'm a Computer Science student at USICT (GGSIPU) with a strong interest in software development and problem-solving. I enjoy building web applications and continuously improving my skills in data structures and algorithms.</p>
-        <p>I'm passionate about creating impactful projects that solve real-world problems — turning ideas into clean, functional, and scalable software.</p>
+      <div class="player-block">
+        <div class="player-label">Equipped</div>
+        <div class="about-tags">
+          <span class="tag">React</span><span class="tag">Node.js</span>
+          <span class="tag">Socket.io</span><span class="tag">MongoDB</span>
+          <span class="tag">Python</span><span class="tag">TensorFlow</span>
+        </div>
       </div>
-      <div class="about-stats">
-        <div class="stat"><div class="stat-val" data-count="7" data-suffix="+">7+</div><div class="stat-label">Projects shipped</div></div>
-        <div class="stat"><div class="stat-val" data-count="505" data-suffix="+">505+</div><div class="stat-label">LeetCode solved</div></div>
-        <div class="stat"><div class="stat-val">∞</div><div class="stat-label">Cups of chai</div></div>
+      <div class="player-block">
+        <div class="player-label">Special move</div>
+        <p class="player-move">Give me a real-world problem and I'll ship a working app for it.</p>
       </div>
     </div>
   </div>
