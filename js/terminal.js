@@ -248,11 +248,39 @@ Type <span class="hl">email</span> to copy, or <span class="hl">open github</spa
     shooter: () => { close(); setTimeout(() => window.playHeatmapGame?.('shooter'), 200); },
     typing: () => window.GAMES?.typing(term),
     achievements: () => {
-      print(`<span class="hl2">secrets</span>  ${foundSecrets.length}/${SECRET_IDS.length} found · player level ${BASE_LEVEL + foundSecrets.length}`);
-      SECRET_IDS.forEach(id => {
-        const [name, hint] = SECRETS[id];
-        print(foundSecrets.includes(id) ? `  <span class="hl">✓ ${esc(name)}</span>` : `  <span class="dim">☐ ???  ${esc(hint)}</span>`);
-      });
+      const list = (title, table) => {
+        const ids = Object.keys(table);
+        print(`<span class="hl2">${title}</span>  ${countFound(table)}/${ids.length}`);
+        ids.forEach(id => print(foundSecrets.includes(id) ? `  <span class="hl">✓ ${esc(table[id][0])}</span>` : `  <span class="dim">☐ ???  ${esc(table[id][1])}</span>`));
+      };
+      print(`player level <span class="hl">${BASE_LEVEL + foundSecrets.length}</span>`);
+      list('secrets', SECRETS);
+      list('bonus', BONUS);
+    },
+    fortune: () => {
+      const fortunes = [
+        'It works on my machine. Ship the machine.',
+        'There are two hard things in computer science: cache invalidation, naming things, and off-by-one errors.',
+        'A senior developer is a junior developer who has broken production more times.',
+        'Weeks of coding can save you hours of planning.',
+        'The bug is never in the compiler. Today it is still not in the compiler.',
+        'You will mass-rename a variable and regret it within the hour.',
+        'First, solve the problem. Then, write the code.',
+        '99 little bugs in the code. Take one down, patch it around. 127 little bugs in the code.',
+      ];
+      print(fortunes[Math.floor(Math.random() * fortunes.length)]);
+      foundSecret('fortune');
+    },
+    42: () => { print('The answer to life, the universe and everything. Now, what was the question?'); foundSecret('answer'); },
+    curl: ([url]) => {
+      if (!url) return err('curl: try <span class="hl">curl hire.me</span>');
+      if (!/^(https?:[/][/])?hire[.]me[/]?$/.test(url)) return err(`curl: (6) Could not resolve host: ${esc(url)}`);
+      print(`HTTP/1.1 <span class="hl">200 OK</span>
+content-type: application/json
+x-powered-by: chai
+
+${esc(JSON.stringify({ available: true, role: 'Full-Stack Developer', email: SITE.email, github: SITE.links.github }, null, 2))}`);
+      foundSecret('curl');
     },
     rm: args => {
       if (!(args.includes('/') && args.some(a => /^-\w*r\w*$/.test(a)))) return err('rm: permission denied. (you would need something more reckless)');

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>404 · vansh.dev</title>
+<!-- Self-contained on purpose: this page is served for any missing path, at any depth,
+     so it cannot rely on relative links to the site's CSS, fonts or scripts -->
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0a0a0f;color:#e8e8f0;font:14px/1.7 ui-monospace,'JetBrains Mono',Consolas,monospace;}
+  @media (prefers-color-scheme:light){ body{background:#f6f5f0;color:#16161d;} .term{border-color:rgba(0,0,0,0.15);} }
+  .term{width:min(620px,100%);border:1px solid rgba(255,255,255,0.12);padding:1.5rem;}
+  .hl{color:#00c46a;}
+  .err{color:#ff3d6e;}
+  .dim{opacity:0.6;}
+  #out div{white-space:pre-wrap;word-break:break-word;}
+  form{display:flex;gap:0.6rem;margin-top:0.4rem;}
+  input{flex:1;min-width:0;background:none;border:none;outline:none;color:inherit;font:inherit;}
+  a{color:#00c46a;}
+</style>
+</head>
+<body>
+<main class="term">
+  <div id="out">
+    <div><span class="hl">vansh@dev:/lost$</span> cat <span id="path"></span></div>
+    <div class="err">cat: No such file or directory (404)</div>
+    <div class="dim">You wandered off the map. Type <span class="hl">cd ..</span> to go home, or <span class="hl">ls</span> to look around.</div>
+  </div>
+  <form id="form" autocomplete="off">
+    <label class="hl" for="cmd">vansh@dev:/lost$</label>
+    <input id="cmd" autofocus spellcheck="false" autocapitalize="off" aria-label="Command">
+  </form>
+  <p class="dim" style="margin-top:1.2rem">No keyboard? <a id="home" href="/">Take me home →</a></p>
+</main>
+<script>
+  // The site lives at the root on Render and under /Portfolio/ on GitHub Pages
+  const HOME = location.hostname.endsWith('github.io') ? '/Portfolio/' : '/';
+  document.getElementById('home').href = HOME;
+  document.getElementById('path').textContent = location.pathname;
+  // The main page awards the "Lost" secret when it sees this flag
+  try { localStorage.setItem('visited-404', 'true'); } catch {}
+
+  const out = document.getElementById('out'), form = document.getElementById('form'), cmd = document.getElementById('cmd');
+  function print(text, cls) {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = text;
+    out.appendChild(line);
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const line = cmd.value.trim().toLowerCase();
+    cmd.value = '';
+    print('vansh@dev:/lost$ ' + line, 'dim');
+    if (!line) return;
+    if (/^(cd( [.][.]| ~| [/])?|home|exit)$/.test(line)) { print('Going home…', 'hl'); setTimeout(() => { location.href = HOME; }, 500); }
+    else if (line === 'ls') print('nothing here. that is rather the point.');
+    else if (line === 'pwd') print('/lost');
+    else if (line === 'help') print('cd ..   go home\nls      look around\npwd     where am I');
+    else if (line.startsWith('sudo')) print('Even root cannot find this page.', 'err');
+    else print('command not found: ' + line + ' — try cd ..', 'err');
+  });
+</script>
+</body>
+</html>

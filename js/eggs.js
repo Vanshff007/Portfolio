@@ -1,9 +1,11 @@
 /* ── Easter eggs ──────────────────────────────────────────────────
    Hidden secrets. Each one found raises the level on the About player
-   card; finding all of them turns the card legendary. Progress is kept
-   in localStorage. The terminal eggs (rm, vim, matrix, hack) live in
-   terminal.js and report here through foundSecret().
+   card. Finding every secret in SECRETS turns the card legendary; the
+   ones in BONUS only add levels. Progress is kept in localStorage.
+   Terminal and game eggs live in terminal.js and games.js and report
+   here through foundSecret().
 ────────────────────────────────────────────────────────────────── */
+// id: [name, hint shown by the `achievements` command while locked]
 const SECRETS = {
   konami:   ['Konami code',        'An old cheat code. The terminal has a hidden file about it.'],
   hire:     ['sudo hire-vansh',    'Ask the terminal for root access to my calendar.'],
@@ -18,9 +20,28 @@ const SECRETS = {
   matrix:   ['Enter the matrix',   'A terminal command named after a 1999 film.'],
   hack:     ['Hack the mainframe', 'A terminal command for movie hackers.'],
 };
+const BONUS = {
+  combo:     ['MERN combo',       'Equip React, Node.js and MongoDB, in that order.'],
+  inspect:   ['Inspect item',     'Inventory rows have a hidden side. Double-click one.'],
+  ready:     ['Player 1 ready',   'Hold the pointer on the name in the player card.'],
+  saveimg:   ['Flattered',        'Right-click the portrait.'],
+  drop:      ['Gravity',          'Click my first name in the hero three times.'],
+  circle:    ['Going in circles', 'Draw circles with the mouse.'],
+  maxskill:  ['Maxed out',        'Click one skill bar until it gives up.'],
+  selectall: ['Copycat',          'Select everything on the page.'],
+  night:     ['Night owl',        'Visit after midnight.'],
+  print:     ['Old school',       'Print the page.'],
+  lost:      ['Lost',             'Visit a page that does not exist.'],
+  fortune:   ['Fortune',          'Ask the terminal for your fortune.'],
+  answer:    ['The answer',       'The terminal knows the answer to everything. It is a number.'],
+  curl:      ['curl hire.me',     'Fetch hire.me from the terminal.'],
+  goldsnake: ['Golden snake',     'Score 20 in snake.'],
+  speed:     ['Speed typist',     'Reach 80 WPM in the typing test.'],
+};
 const SECRET_IDS = Object.keys(SECRETS);
 const BASE_LEVEL = 4;
-const foundSecrets = store.get('secrets', []).filter(id => SECRETS[id]);
+const foundSecrets = store.get('secrets', []).filter(id => SECRETS[id] || BONUS[id]);
+const countFound = table => Object.keys(table).filter(id => foundSecrets.includes(id)).length;
 
 /* ── Progress: toast, level and legendary card ── */
 const secretToast = document.body.appendChild(Object.assign(document.createElement('div'), { className: 'secret-toast' }));
@@ -38,9 +59,9 @@ const playerLvl  = document.getElementById('playerLvl');
 const playerRole = document.getElementById('playerRole');
 const playerRoleText = playerRole.textContent;
 function renderLevel() {
-  const all = foundSecrets.length === SECRET_IDS.length;
+  const core = countFound(SECRETS), all = core === SECRET_IDS.length;
   playerLvl.textContent = 'LVL ' + (BASE_LEVEL + foundSecrets.length);
-  playerLvl.title = `${foundSecrets.length}/${SECRET_IDS.length} secrets found`;
+  playerLvl.title = `${core}/${SECRET_IDS.length} secrets, ${countFound(BONUS)}/${Object.keys(BONUS).length} bonus`;
   playerCard.classList.toggle('legendary', all);
   playerRole.textContent = all ? 'Class: Legendary' : playerRoleText;
 }
@@ -48,24 +69,33 @@ renderLevel();
 
 // Returns true the first time a secret is found
 function foundSecret(id) {
-  if (!SECRETS[id] || foundSecrets.includes(id)) return false;
+  const table = SECRETS[id] ? SECRETS : BONUS[id] ? BONUS : null;
+  if (!table || foundSecrets.includes(id)) return false;
   foundSecrets.push(id);
   store.set('secrets', foundSecrets);
   renderLevel();
-  const all = foundSecrets.length === SECRET_IDS.length;
-  showSecretToast(all
-    ? `All ${SECRET_IDS.length} secrets found. <b>Player card is now legendary.</b>`
-    : `Secret found: ${esc(SECRETS[id][0])} <b>${foundSecrets.length}/${SECRET_IDS.length}</b>`);
+  const total = Object.keys(table).length, n = countFound(table);
+  const legendary = table === SECRETS && n === total;
+  showSecretToast(legendary
+    ? `All ${total} secrets found. <b>Player card is now legendary.</b>`
+    : `${table === BONUS ? 'Bonus secret' : 'Secret found'}: ${esc(table[id][0])} <b>${n}/${total}</b>`);
   sfx('success');
-  if (all) confetti(260);
+  if (legendary) confetti(260);
   return true;
 }
 
-/* ── Portrait: five quick clicks ── */
+/* ── Portrait: five quick clicks, or a right-click ── */
 (function () {
   const portrait = document.getElementById('playerPortrait');
   const lines = ['Underrated. The sweater says so.', 'Stop poking. Start hiring.', 'I debug better than I pose.', 'Chai first, then code.', 'Ow.'];
   let clicks = 0, last = 0, bubble = null, timer = null;
+  function say(text) {
+    bubble = bubble || portrait.appendChild(Object.assign(document.createElement('div'), { className: 'portrait-bubble' }));
+    bubble.textContent = text;
+    bubble.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(() => bubble.classList.remove('show'), 2600);
+  }
   portrait.addEventListener('click', () => {
     const now = Date.now();
     clicks = now - last < 600 ? clicks + 1 : 1;
@@ -73,13 +103,11 @@ function foundSecret(id) {
     if (clicks < 5) return;
     clicks = 0;
     portrait.classList.remove('poked'); void portrait.offsetWidth; portrait.classList.add('poked');
-    bubble = bubble || portrait.appendChild(Object.assign(document.createElement('div'), { className: 'portrait-bubble' }));
-    bubble.textContent = lines[Math.floor(Math.random() * lines.length)];
-    bubble.classList.add('show');
-    clearTimeout(timer);
-    timer = setTimeout(() => bubble.classList.remove('show'), 2600);
+    say(lines[Math.floor(Math.random() * lines.length)]);
     foundSecret('portrait');
   });
+  // The browser's own menu still opens
+  portrait.addEventListener('contextmenu', () => { say('Save image? Flattered.'); foundSecret('saveimg'); });
 })();
 
 /* ── Logo: seven quick clicks start party mode ── */
@@ -99,12 +127,17 @@ function foundSecret(id) {
   });
 })();
 
-/* ── Type "vansh" anywhere outside a text field ── */
+/* ── Keyboard: type "vansh", or select everything ── */
 (function () {
   const word = 'vansh';
   let typed = '';
   document.addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA/.test(document.activeElement.tagName) || e.key.length !== 1) return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      flash('Copying the whole portfolio? The resume is one click away.');
+      foundSecret('selectall');
+      return;
+    }
     typed = (typed + e.key.toLowerCase()).slice(-word.length);
     if (typed !== word) return;
     typed = '';
@@ -151,6 +184,132 @@ new IntersectionObserver(([e], o) => {
   document.getElementById('footSecret').hidden = false;
   foundSecret('bottom');
 }, { threshold: 0.9 }).observe(document.querySelector('footer'));
+
+/* ── Player card: tag combo, inventory flip, name hold ── */
+(function () {
+  // Equip three tags in order
+  const order = ['React', 'Node.js', 'MongoDB'];
+  const tags = playerCard.querySelector('.about-tags'), label = tags.previousElementSibling, labelText = label.textContent;
+  let pos = 0, comboTimer = null;
+  const mark = n => [...tags.children].forEach(t => t.classList.toggle('equipped', order.slice(0, n).includes(t.textContent)));
+  tags.addEventListener('click', e => {
+    const tag = e.target.closest('.tag');
+    if (!tag) return;
+    pos = tag.textContent === order[pos] ? pos + 1 : (tag.textContent === order[0] ? 1 : 0);
+    mark(pos);
+    if (pos < order.length) return;
+    pos = 0;
+    label.textContent = labelText + ' · Combo: MERN stack';
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => { label.textContent = labelText; mark(0); }, 4000);
+    foundSecret('combo');
+  });
+
+  // Double-click an inventory row to see its hidden side
+  const hiddenStats = [['Chai consumed', '∞'], ['Bugs created', 'Classified'], ['Tabs open', 'Too many'], ['Sleep', 'Deprecated'], ['Stack Overflow visits', 'Redacted'], ['Coffee', '0. Chai only.']];
+  const inv = playerCard.querySelector('.player-inv');
+  inv.addEventListener('dblclick', e => {
+    const row = e.target.closest('.player-inv > div');
+    const side = row && hiddenStats[[...inv.children].indexOf(row)];
+    if (!side) return;
+    const [dt, dd] = row.children;
+    if (row.dataset.front) {
+      [dt.textContent, dd.textContent] = JSON.parse(row.dataset.front);
+      delete row.dataset.front;
+    } else {
+      row.dataset.front = JSON.stringify([dt.textContent, dd.textContent]);
+      [dt.textContent, dd.textContent] = side;
+    }
+    row.classList.toggle('flipped', !!row.dataset.front);
+    foundSecret('inspect');
+  });
+
+  // Hold the pointer on the name for three seconds
+  const name = playerCard.querySelector('.about-name'), nameText = name.textContent;
+  let holdTimer = null, busy = false;
+  const setName = text => { name.dataset.text = text; if (reduceMotion) name.textContent = text; else scramble(name); };
+  name.addEventListener('mouseenter', () => {
+    holdTimer = setTimeout(() => {
+      if (busy) return;
+      busy = true;
+      setName('Player 1 Ready');
+      foundSecret('ready');
+      setTimeout(() => { setName(nameText); busy = false; }, 2600);
+    }, 3000);
+  });
+  name.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+})();
+
+/* ── Hero name: three quick clicks and the letters fall ── */
+(function () {
+  const el = document.getElementById('heroName'), text = el.textContent;
+  let clicks = 0, last = 0, busy = false;
+  el.addEventListener('click', () => {
+    const now = Date.now();
+    clicks = now - last < 600 ? clicks + 1 : 1;
+    last = now;
+    if (clicks < 3 || busy) return;
+    clicks = 0;
+    foundSecret('drop');
+    if (reduceMotion) return;
+    busy = true;
+    el.innerHTML = [...text].map((ch, i) => `<span class="drop-letter" style="animation-delay:${i * 70}ms">${esc(ch)}</span>`).join('');
+    setTimeout(() => { el.textContent = text; busy = false; }, 1700 + text.length * 70);
+  });
+})();
+
+/* ── Draw two circles with the mouse: the cursor ring spins ── */
+if (finePointer) (function () {
+  let px, py, heading = null, turned = 0, lastT = 0;
+  document.addEventListener('mousemove', e => {
+    if (px === undefined || e.timeStamp - lastT > 250) { px = e.clientX; py = e.clientY; heading = null; turned = 0; lastT = e.timeStamp; return; }
+    const dx = e.clientX - px, dy = e.clientY - py;
+    if (dx * dx + dy * dy < 144) return; // one sample per 12px of travel
+    const h = Math.atan2(dy, dx);
+    if (heading !== null) {
+      const d = Math.atan2(Math.sin(h - heading), Math.cos(h - heading)); // turn since the last sample, -π to π
+      // Turning the same way adds up. A clear turn the other way starts over; small wobbles are ignored.
+      if (turned && Math.sign(d) !== Math.sign(turned)) { if (Math.abs(d) > 0.5) turned = d; }
+      else turned += d;
+    }
+    heading = h; px = e.clientX; py = e.clientY; lastT = e.timeStamp;
+    if (Math.abs(turned) < Math.PI * 4) return;
+    turned = 0;
+    ring.classList.add('spin');
+    ring.addEventListener('animationend', () => ring.classList.remove('spin'), { once: true });
+    if (reduceMotion) setTimeout(() => ring.classList.remove('spin'), 1000);
+    foundSecret('circle');
+  });
+})();
+
+/* ── Skill bars: ten clicks on one bar max it out for a moment ── */
+(function () {
+  const counts = new WeakMap();
+  // Capture phase, so a click on the bar does not also run the row's own click (filter projects)
+  document.getElementById('skillsBars').addEventListener('click', e => {
+    const right = e.target.closest('.skill-right');
+    if (!right) return;
+    e.stopPropagation();
+    const n = (counts.get(right) || 0) + 1;
+    counts.set(right, n % 10);
+    if (n < 10) return;
+    const bar = right.querySelector('.skill-bar'), pct = right.querySelector('.skill-pct');
+    const was = [bar.style.transform, pct.textContent];
+    bar.style.transform = 'scaleX(1)';
+    pct.textContent = '100%';
+    flash('100%. If only it was that easy.');
+    setTimeout(() => { [bar.style.transform, pct.textContent] = was; }, 3000);
+    foundSecret('maxskill');
+  }, true);
+})();
+
+/* ── Printing the page, visiting at night, coming back from the 404 page ── */
+addEventListener('beforeprint', () => foundSecret('print'));
+addEventListener('load', () => setTimeout(() => {
+  if (new Date().getHours() < 4) { flash('Up late? Me too. 🌙'); foundSecret('night'); }
+  // 404.html sets this flag; the secret is awarded on the next visit to the real page
+  if (store.get('visited-404')) foundSecret('lost');
+}, 2500), { once: true });
 
 /* ── Used by the terminal: rm -rf / ── */
 function fakeWipe() {
