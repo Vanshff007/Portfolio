@@ -24,7 +24,7 @@ h1 .outline{-webkit-text-stroke:1.5px var(--text);color:transparent;}h1 .accent{
 .hero-badge{position:absolute;right:6%;top:40%;width:140px;height:140px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;animation:fadeIn 1s 1s forwards,spin 20s linear infinite;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);text-align:center;padding:1rem;line-height:2;z-index:1;text-decoration:none;cursor:inherit;transition:background 0.2s,color 0.2s;}
 .hero-badge:hover,.hero-badge:focus-visible{background:var(--accent);color:var(--on-accent);}
 .scroll-hint{position:absolute;bottom:2.5rem;left:3rem;display:flex;align-items:center;gap:0.75rem;font-size:0.65rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;opacity:0;animation:fadeIn 1s 1.2s forwards;}
-.scroll-line{width:40px;height:1px;background:var(--muted);position:relative;overflow:hidden;}.scroll-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--accent);animation:slide 2s ease-in-out infinite;}
+.scroll-line{width:40px;height:1px;background:var(--muted);position:relative;overflow:hidden;}.scroll-line::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:var(--accent);transform:translateX(-100%);animation:slide 2s ease-in-out infinite;}
 section{padding:7rem 3rem;}
 .section-header{display:flex;align-items:baseline;gap:1.5rem;margin-bottom:4rem;}
 .section-num{font-size:0.65rem;color:var(--accent);letter-spacing:0.2em;white-space:nowrap;}
@@ -139,7 +139,7 @@ footer p{font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;}.footer-acce
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 @keyframes heroUp{from{opacity:0.01;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-@keyframes slide{0%{left:-100%;}50%{left:100%;}100%{left:100%;}}
+@keyframes slide{0%{transform:translateX(-100%);}50%,100%{transform:translateX(100%);}}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s,transform 0.7s cubic-bezier(0.16,1,0.3,1);}.reveal.visible{opacity:1;transform:translateY(0);}
 
@@ -175,9 +175,10 @@ nav ul a:hover::after,nav ul a.active::after{transform:scaleX(1);}
 .project-card{transform-style:preserve-3d;}.project-card:hover{will-change:transform;}
 .project-card::after{background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(var(--accent-rgb),0.09),transparent 45%);}
 .project-card .project-num{display:flex;justify-content:space-between;}
-.status-dot{display:inline-flex;align-items:center;gap:0.4rem;color:var(--muted);font-size:0.58rem;}
-.status-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(var(--accent-rgb),0.6);animation:pulse 2s infinite;}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0.6);}70%{box-shadow:0 0 0 8px rgba(var(--accent-rgb),0);}100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0);}}
+.status-dot{position:relative;display:inline-flex;align-items:center;gap:0.4rem;color:var(--muted);font-size:0.58rem;}
+.status-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);}
+.status-dot::after,.live-pill::after{content:'';position:absolute;left:0;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--accent);pointer-events:none;animation:pulse 2s infinite;}
+@keyframes pulse{0%{transform:scale(1);opacity:0.6;}70%,100%{transform:scale(3.7);opacity:0;}}
 
 /* ── GitHub projects ── */
 .projects-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;}

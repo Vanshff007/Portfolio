@@ -18,7 +18,7 @@ let mx = 0, my = 0, rx = 0, ry = 0, cursorRaf = 0;
 // so touch devices (cursor hidden) and an idle mouse cost nothing per frame
 function animCursor() {
   cursor.style.translate = `${mx}px ${my}px`;
-  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  rx += (mx - rx) * 0.22; ry += (my - ry) * 0.22;
   ring.style.translate = `${rx}px ${ry}px`;
   cursorRaf = Math.abs(mx - rx) + Math.abs(my - ry) > 0.5 ? requestAnimationFrame(animCursor) : 0;
 }
@@ -257,15 +257,19 @@ navLinks.forEach(a => a.addEventListener('click', () => setMenu(false)));
     if (running && !still) requestAnimationFrame(draw);
   }
 
+  // The hero's position is measured once and again only after a scroll or resize (see rectGen)
+  let heroRect, heroGen = -1;
   hero.addEventListener('mousemove', e => {
-    const r = hero.getBoundingClientRect();
-    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    if (heroGen !== rectGen) { heroRect = hero.getBoundingClientRect(); heroGen = rectGen; }
+    mouse.x = e.clientX - heroRect.left; mouse.y = e.clientY - heroRect.top;
   });
   hero.addEventListener('mouseleave', () => { mouse.x = mouse.y = -9999; });
   new IntersectionObserver(([e]) => {
     const was = running; running = e.isIntersecting;
+    hero.classList.toggle('offscreen', !running); // pauses the hero's CSS animations too
     if (running && !was && pts.length) requestAnimationFrame(draw);
-  }).observe(hero);
+  // -1px: a hero that only touches the edge of the viewport does not count as visible
+  }, { rootMargin: '-1px 0px' }).observe(hero);
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); if (still) draw(); }, 150); });
   // Start once the page has loaded and the main thread is idle, so the
   // particles don't compete with the hero text for first paint
