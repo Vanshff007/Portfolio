@@ -33,6 +33,7 @@ window.GAMES = {
     }
     function draw() {
       const cs = getComputedStyle(document.documentElement);
+      const gold = foundSecrets.includes('goldsnake'); // skin unlocked at score 20
       ctx.fillStyle = cs.getPropertyValue('--term-bg');
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = `rgba(${themeRGB.fg},0.04)`;
@@ -41,7 +42,7 @@ window.GAMES = {
       ctx.fillStyle = `rgb(${themeRGB.accent2})`;
       ctx.fillRect(food[0] * CELL + 3, food[1] * CELL + 3, CELL - 6, CELL - 6);
       snake.forEach((s, i) => {
-        ctx.fillStyle = `rgba(${themeRGB.accent},${1 - i / (snake.length + 4)})`;
+        ctx.fillStyle = `rgba(${gold ? '245,197,66' : themeRGB.accent},${1 - i / (snake.length + 4)})`;
         ctx.fillRect(s[0] * CELL + 1, s[1] * CELL + 1, CELL - 2, CELL - 2);
       });
     }
@@ -53,6 +54,7 @@ window.GAMES = {
       if (head[0] === food[0] && head[1] === food[1]) {
         score++; food = spawn(); sfx('success');
         scoreLine.textContent = 'score: ' + score;
+        if (score === 20 && foundSecret('goldsnake')) t.print('<span class="hl">Golden snake unlocked.</span>');
         clearInterval(timer); timer = setInterval(step, Math.max(55, 130 - score * 4));
       } else snake.pop();
       draw();
@@ -130,6 +132,7 @@ window.GAMES = {
       if (newBest) store.set('typing-best', wpm);
       t.print(`<span class="hl">${wpm} WPM</span> at ${acc}% accuracy.${newBest ? ' New best! 🏆' : acc < 90 ? ' (best only counts at 90%+ accuracy)' : ''} Type <span class="hl">typing</span> to go again.`);
       sfx('success');
+      if (wpm >= 80 && acc >= 90 && foundSecret('speed')) t.print('Faster than me. Want my job?');
       program.stop();
     }
     t.run(program);
