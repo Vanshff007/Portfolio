@@ -71,22 +71,33 @@ Dark (default), Light, Dracula, Matrix and Sunset. Use the ◐ button in the nav
 ## Project structure
 
 ```
-index.html          Page markup
-css/style.css       Base styles and layout
-css/features.css    Themes and styles for the newer features
-js/config.js        All editable content: links, projects, timeline, skills, feature switches
-js/render.js        Shared helpers; builds skill bars and the timeline from config
-js/core.js          Cursor, scroll effects, hero canvas, contact form
-js/projects.js      GitHub projects, case-study modal, hover preview
-js/ui.js            Themes, sound, command palette, Konami code, confetti
-js/terminal.js      Terminal and fake filesystem
-js/games.js         Snake and typing test
-js/heatmap-games.js Pac-Man and Space Shooter played on the heatmaps
-js/widgets.js       GitHub, LeetCode, "currently", Dev.to, visitor counter, giscus, Lighthouse badge
-js/skills-graph.js  Skills graph
-js/chat.js          AI chat window
-assets/             Resume PDF and favicon
-server/             Optional Node API (AI chat, LeetCode, Spotify)
+index.html              Page markup
+404.html                Self-contained page for missing URLs
+sw.js                   Service worker: offline support
+manifest.webmanifest    Install metadata
+giscus.json             Guestbook (giscus) settings
+css/
+  style.css             Base styles and layout
+  features.css          Themes and styles for the newer features
+js/
+  config.js             All editable content: links, projects, timeline, skills, feature switches
+  core/                 Loaded first; everything else builds on these
+    render.js           Shared helpers; builds skill bars and the timeline from config
+    core.js             Cursor, scroll effects, hero canvas, contact form
+    ui.js               Themes, sound, command palette, Konami code, confetti
+  sections/             One file per page section or widget
+    projects.js         GitHub projects, case-study modal, hover preview
+    widgets.js          GitHub, LeetCode, "currently", Dev.to, visitor counter, giscus, Lighthouse badge
+    skills-graph.js     Skills graph
+    chat.js             AI chat window
+  terminal/
+    terminal.js         Terminal and fake filesystem
+    games.js            Snake and typing test, played inside the terminal
+  extras/
+    eggs.js             Easter eggs and the player card level
+    heatmap-games.js    Pac-Man and Space Shooter played on the heatmaps
+assets/                 Resume PDF, portrait, favicon and fonts
+server/                 Optional Node API (AI chat, LeetCode, Spotify)
 ```
 
 ## Configuration
@@ -100,7 +111,7 @@ Everything you would normally edit is in `js/config.js`:
 - `TIMELINE`, `SKILL_GROUPS`: the Journey and Skills content.
 - `GH_USER`, `GH_EXCLUDE`, `PROJECT_INFO`, `FEATURED_ORDER`: the projects list and case studies. `PROJECT_INFO` adds curated titles, stacks and case-study text (`problem`, `arch`, `challenges`, `outcome`), since the GitHub API only reports languages.
 
-After changing the projects config, bump `CACHE_KEY` in `js/projects.js` (for example `gh-projects-v3` to `gh-projects-v4`) so returning visitors get the new list right away.
+After changing the projects config, bump `CACHE_KEY` in `js/sections/projects.js` (for example `gh-projects-v3` to `gh-projects-v4`) so returning visitors get the new list right away.
 
 ### Guestbook
 Done for this repo: Discussions are enabled, the giscus app is installed, and `SITE.giscus` points at the **Announcements** category (only maintainers and giscus can start threads there, so visitors can only reply in the one "Guestbook" thread). `giscus.json` limits which sites may embed it.
