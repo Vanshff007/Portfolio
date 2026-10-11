@@ -55,7 +55,7 @@ const TIMELINE = [
   { when: '2021 – 2023', title: 'Class XII (CBSE), Delhi Public School Ranipur', kind: 'Education',
     text: 'Senior secondary education in Haridwar. Scored 90.8%.' },
   { when: '2023 – 2027', title: 'B.Tech Computer Science, USICT (GGSIPU)', kind: 'Education',
-    text: 'University School of Information, Communication and Technology, New Delhi. CGPA 7.8.' },
+    text: 'University School of Information, Communication and Technology, New Delhi. CGPA 8.1.' },
   { when: 'Ongoing', title: '505+ LeetCode problems, 1743 contest rating', kind: 'Achievement',
     text: 'Consistent problem solving across arrays, graphs, DP and greedy. Top 11% in LeetCode contests.' },
   { when: '2025', title: 'Hackathons and contests', kind: 'Achievement',
