@@ -11,7 +11,7 @@
 - Status: open to internships, collaborations and interesting projects.
 
 ## Education
-- B.Tech in Computer Science Engineering, University School of Information, Communication and Technology (USICT), GGSIPU, New Delhi. 2023 – 2027. CGPA 7.8.
+- B.Tech in Computer Science Engineering, University School of Information, Communication and Technology (USICT), GGSIPU, New Delhi. 2023 – 2027. CGPA 8.1.
 - Class XII (CBSE), Delhi Public School Ranipur, Haridwar. 2021 – 2023. Scored 90.8%.
 
 ## Work experience
