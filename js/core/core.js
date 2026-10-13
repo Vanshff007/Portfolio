@@ -65,12 +65,12 @@ function scramble(el) {
 
 /* ── Count-up stats ── */
 function countUp(el) {
-  const target = +el.dataset.count, suffix = el.dataset.suffix || '';
   if (reduceMotion) return;
   const start = performance.now(), dur = 1200;
   (function tick(now) {
     const p = Math.min((now - start) / dur, 1);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+    // Read on every frame: live data can replace the target while the count is running
+    el.textContent = Math.round(+el.dataset.count * (1 - Math.pow(1 - p, 3))) + (el.dataset.suffix || '');
     if (p < 1) requestAnimationFrame(tick);
   })(start);
 }
@@ -102,7 +102,7 @@ const revealObs = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
-// For sections rendered after load (widgets, blog posts)
+// For sections rendered after load (widgets)
 function observeReveal(root) { root.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObs.observe(el)); }
 
 /* ── Skill bars ── */
@@ -146,6 +146,7 @@ addEventListener('scroll', onScroll, { passive: true });
 addEventListener('resize', measure);
 new ResizeObserver(measure).observe(document.body);
 toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+document.getElementById('footYear').textContent = new Date().getFullYear();
 
 /* ── Active nav link ── */
 const navLinks = document.querySelectorAll('#navLinks a');

@@ -1,4 +1,4 @@
-/* ── Live widgets: GitHub activity, LeetCode, "currently", blog, visitors, guestbook ── */
+/* ── Live widgets: GitHub activity, LeetCode, "currently", visitors, guestbook ── */
 
 // Small fetch-with-localStorage-cache helper
 async function cachedJSON(key, url, ttlMs, opts) {
@@ -90,6 +90,21 @@ whenNear('activity', function () {
     .catch(() => { list.innerHTML = '<li class="muted">Commits unavailable (GitHub rate limit). Try again later.</li>'; });
 });
 
+/* ── LeetCode numbers on the About card ──
+   The markup holds the last hand-written numbers. Live stats replace them: from the
+   last visit's cache right away, and again when the LeetCode card loads fresh data. */
+function syncLeetCodeStats(d) {
+  const set = (id, n, suffix) => {
+    const el = document.getElementById(id);
+    if (!el || !n) return;
+    el.dataset.count = n; el.dataset.suffix = suffix;
+    el.textContent = n + suffix;
+  };
+  set('statLcSolved', d.total, ' solved');
+  set('statLcRating', Math.round(d.rating), '');
+}
+{ const hit = store.get('lc-stats-v2'); if (hit?.data) syncLeetCodeStats(hit.data); }
+
 /* ── LeetCode card ── */
 whenNear('activity', function () {
   const $ = id => document.getElementById(id);
@@ -121,6 +136,7 @@ whenNear('activity', function () {
   // Both APIs down (the public one rate-limits): show the last known numbers from config
   load().catch(() => SITE.leetcodeFallback).then(d => {
     window.LC_STATS = d;
+    if (d !== SITE.leetcodeFallback) syncLeetCodeStats(d);
     const sum = d.easy + d.medium + d.hard || 1;
     ring($('ringEasy'), 0, d.easy / sum);
     ring($('ringMed'), d.easy / sum, d.medium / sum);

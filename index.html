@@ -4,8 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vansh Minhas | Full-Stack Developer</title>
-<meta name="description" content="Vansh Minhas: full-stack developer and CS student at USICT (GGSIPU). Real-time web apps, AI/ML projects, 505+ LeetCode problems.">
+<meta name="description" content="Vansh Minhas: full-stack developer and CS student at USICT (GGSIPU). Real-time web apps, AI/ML projects, 500+ LeetCode problems.">
 <meta name="theme-color" content="#0a0a0f">
+<link rel="canonical" href="https://vanshff007.github.io/Portfolio/">
+<!-- Link preview card for LinkedIn, WhatsApp, X, Slack… (they need absolute URLs) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vansh Minhas">
+<meta property="og:title" content="Vansh Minhas | Full-Stack Developer">
+<meta property="og:description" content="Full-stack developer and CS student at USICT (GGSIPU). Real-time web apps, AI/ML projects and competitive programming.">
+<meta property="og:url" content="https://vanshff007.github.io/Portfolio/">
+<meta property="og:image" content="https://vanshff007.github.io/Portfolio/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Vansh Minhas, full-stack developer">
+<meta name="twitter:card" content="summary_large_image">
 <script>
   // Apply the theme before first paint, so there is no flash: the saved one,
   // or the system's light/dark setting when the visitor has not picked one
@@ -19,6 +31,7 @@
   })();
 </script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <!-- Self-hosted fonts, fetched in parallel with the CSS so the hero text doesn't wait on a third party -->
 <link rel="preload" href="assets/fonts/syne-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -160,9 +173,9 @@
           <div><dt>CodeArena</dt><dd>Real-time 1v1</dd></div>
           <div><dt>Projects shipped</dt><dd id="statProjects" data-count="7" data-suffix="+">7+</dd></div>
           <div><dt>Paint Together</dt><dd>Live on Render</dd></div>
-          <div><dt>LeetCode</dt><dd data-count="505" data-suffix="+ solved">505+ solved</dd></div>
+          <div><dt>LeetCode</dt><dd id="statLcSolved" data-count="505" data-suffix="+ solved">505+ solved</dd></div>
           <div><dt>RAG Application</dt><dd>PDF · TXT · DOCX</dd></div>
-          <div><dt>Contest rating</dt><dd data-count="1743">1743</dd></div>
+          <div><dt>Contest rating</dt><dd id="statLcRating" data-count="1743">1743</dd></div>
         </dl>
       </div>
       <div class="player-block">
@@ -331,7 +344,7 @@
       <h2>Let's build something<br><span class="outline">great</span> together.</h2>
       <p>Open to internships, collaborations, and interesting projects. Drop me a message and I'll get back to you soon.</p>
       <div class="contact-links">
-        <a href="https://mail.google.com/mail/?view=cm&amp;to=vansh31082005@gmail.com" target="_blank" rel="noopener noreferrer" class="social-btn btn-gmail">
+        <a href="mailto:vansh31082005@gmail.com" class="social-btn btn-gmail">
           <div class="social-btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.908 1.528-1.147C21.69 2.28 24 3.434 24 5.457z" fill="#ea4335"/></svg></div>
           <div class="social-btn-label"><span class="social-btn-site">Gmail</span><span class="social-btn-handle">vansh31082005@gmail.com</span></div>
         </a>
@@ -356,6 +369,8 @@
           action="https://formspree.io/f/mvzdpgne"
           method="POST"
           novalidate>
+      <!-- Honeypot: people never see it, bots fill it in, and Formspree drops those submissions -->
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
       <div class="form-group">
         <label class="form-label" for="cf-name">Name</label>
         <input id="cf-name" name="name" type="text" class="form-input" placeholder="Your name" required>
@@ -384,7 +399,7 @@
 </main>
 
 <footer>
-  <p>© 2026 <span class="footer-accent">Vansh Minhas</span> · Built with intention · <span id="footVisits"></span><span class="footer-accent"> · You scrolled all the way. Hire me already.</span></p>
+  <p>© <span id="footYear">2026</span> <span class="footer-accent">Vansh Minhas</span> · Built with intention · <span id="footVisits"></span><span class="footer-accent"> · You scrolled all the way. Hire me already.</span></p>
   <p class="print-note">Printed a portfolio? Old school. Respect.</p>
   <div class="footer-right">
     <a class="lh-badge" id="lhBadge" href="https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fvanshff007.github.io%2FPortfolio%2F" target="_blank" rel="noopener noreferrer" hidden></a>

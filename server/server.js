@@ -39,7 +39,7 @@ ${profile}
 const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 const app = express();
 app.set('trust proxy', 1); // Render sits behind one proxy; needed for per-IP rate limits
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json({ limit: '64kb' }));
 
 // CORS: only the portfolio's own origins
 app.use((req, res, next) => {
@@ -79,10 +79,12 @@ function cached(ttlMs, fn) {
 app.get('/api/health', (req, res) => res.json({ ok: true, chat: !!ai }));
 
 /* ── AI chat ── */
+// Answers come back in the history and can be much longer than a question, so they get a higher cap
+const MAX_CHARS = { user: 1000, assistant: 6000 };
 function validMessages(messages) {
   if (!Array.isArray(messages) || messages.length === 0 || messages.length > 12) return false;
   return messages.every((m, i) =>
-    m && typeof m.content === 'string' && m.content.trim() && m.content.length <= 1000 &&
+    m && typeof m.content === 'string' && m.content.trim() && m.content.length <= MAX_CHARS[m.role] &&
     m.role === (i % 2 === 0 ? 'user' : 'assistant')) && messages.at(-1).role === 'user';
 }
 

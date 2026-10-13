@@ -50,7 +50,8 @@
       const res = await fetch(base + '/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-10) }),
+        // An odd count, so the slice still starts and ends with a visitor message (the server checks)
+        body: JSON.stringify({ messages: history.slice(-9) }),
       });
       if (!res.ok || !res.body) throw new Error(res.status === 429 ? 'Too many questions — try again in a minute.' : 'Server error ' + res.status);
       const reader = res.body.getReader(), dec = new TextDecoder();
