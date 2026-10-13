@@ -13,7 +13,6 @@ Personal portfolio of Vansh Minhas, a full-stack developer and CS student at USI
 - Filters for All, Full-Stack, AI / ML and Frontend.
 - **Case-study modal:** click a card (or "Case study") to see the problem, an architecture diagram, challenges, outcome, a screenshot and links.
 - **Hover preview:** a screenshot of the live demo follows the cursor over each card (via microlink.io; GitHub's social preview image as fallback).
-- Demos on Render's free tier open through a "waking up server" screen.
 
 ### Journey
 An education, work and achievements timeline. The line draws itself as you scroll.
@@ -87,7 +86,7 @@ js/
     ui.js               Themes, sound, command palette, Konami code, confetti
   sections/             One file per page section or widget
     projects.js         GitHub projects, case-study modal, hover preview
-    widgets.js          GitHub, LeetCode, "currently", Dev.to, visitor counter, giscus, Lighthouse badge
+    widgets.js          GitHub, LeetCode, "currently", visitor counter, giscus, Lighthouse badge
     skills-graph.js     Skills graph
     chat.js             AI chat window
   terminal/
@@ -96,7 +95,7 @@ js/
   extras/
     eggs.js             Easter eggs and the player card level
     heatmap-games.js    Pac-Man and Space Shooter played on the heatmaps
-assets/                 Resume PDF, portrait, favicon and fonts
+assets/                 Resume PDF, portrait, favicon, app icons, link preview image (og.png) and fonts
 server/                 Optional Node API (AI chat, LeetCode, Spotify)
 ```
 
