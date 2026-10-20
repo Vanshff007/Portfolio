@@ -115,6 +115,7 @@ function scrollToSection(id) {
   function buildItems() {
     const sections = [...document.querySelectorAll('main section[id]')].filter(s => !s.hidden && s.id !== 'hero')
       .map(s => ({ group: 'Go to', label: s.querySelector('.section-title')?.dataset.text || s.querySelector('.section-title')?.textContent || s.id, hint: '#' + s.id, run: () => scrollToSection(s.id) }));
+    const posts = POSTS.map(p => ({ group: 'Writing', label: p.title, hint: `${p.minutes} min read`, run: () => { location.href = `posts/${p.slug}.html`; } }));
     const projects = PROJECTS.map(p => ({ group: 'Projects', label: p.title, hint: p.tech.slice(0, 3).join(' · '), run: () => openProject(p.name) }));
     const links = [
       { group: 'Links', label: 'GitHub', hint: 'github.com/Vanshff007', run: () => open(SITE.links.github, '_blank', 'noopener') },
@@ -124,6 +125,8 @@ function scrollToSection(id) {
     const actions = [
       { group: 'Actions', label: 'Download resume', hint: 'PDF', run: () => { trackResume(); const a = document.createElement('a'); a.href = SITE.resume; a.download = 'Vansh_Minhas_Resume.pdf'; a.click(); } },
       { group: 'Actions', label: 'Copy email address', hint: SITE.email, run: () => navigator.clipboard?.writeText(SITE.email).then(() => flash('Email copied ✓')) },
+      { group: 'Actions', label: window.isRecruiterView?.() ? 'Back to the full site' : 'Recruiter view (one page)', hint: 'view', run: () => window.setView?.(window.isRecruiterView?.() ? 'full' : 'recruiter') },
+      { group: 'Actions', label: 'Print a one-page summary', hint: 'PDF or paper', run: () => window.print() },
       { group: 'Actions', label: 'Open terminal', hint: 'Ctrl K', run: () => window.openTerminal?.() },
       { group: 'Actions', label: 'Ask the AI about me', hint: 'chat', run: () => window.openChat?.(), when: () => !!SITE.apiBase },
       { group: 'Actions', label: `Sound effects: turn ${soundOn ? 'off' : 'on'}`, hint: '♪', run: () => setSound(!soundOn) },
@@ -133,7 +136,7 @@ function scrollToSection(id) {
       { group: 'Actions', label: 'Play Space Shooter on my LeetCode graph', hint: 'game', run: () => window.playHeatmapGame?.('shooter') },
       ...THEMES.map(t => ({ group: 'Theme', label: `Theme: ${t}`, hint: t === currentTheme() ? 'current' : '', run: () => setTheme(t) })),
     ].filter(a => !a.when || a.when());
-    return [...sections, ...projects, ...actions, ...links];
+    return [...sections, ...projects, ...posts, ...actions, ...links];
   }
 
   // Subsequence fuzzy match; consecutive and word-start hits score higher

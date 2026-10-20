@@ -164,7 +164,7 @@ nav ul a:hover::after,nav ul a.active::after{transform:scaleX(1);}
 
 /* ── Hero canvas + rotating word ── */
 #heroCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-#hero .hero-label,#hero h1,#hero .hero-sub,#hero .hero-ctas,#hero .hero-hint{position:relative;z-index:1;}
+#hero .hero-label,#hero h1,#hero .hero-sub,#hero .hero-ctas,#hero .hero-hint,#hero .hero-quick{position:relative;z-index:1;}
 .rotator{display:inline-block;min-width:1ch;}
 .rotator::after{content:'';display:inline-block;width:0.08em;height:0.8em;margin-left:0.06em;background:var(--accent);vertical-align:baseline;animation:blink 1s steps(1) infinite;}
 @keyframes blink{50%{opacity:0;}}
@@ -254,7 +254,7 @@ nav ul a:hover::after,nav ul a.active::after{transform:scaleX(1);}
   nav{padding:1rem 1.25rem;background:rgba(var(--bg-rgb),0.96);backdrop-filter:none;}
   .menu-btn{display:block;}
   nav ul{position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(var(--bg-rgb),0.97);border-bottom:1px solid var(--border);max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
-  nav ul.open{max-height:320px;}
+  nav ul.open{max-height:380px;}
   nav ul li a{display:block;padding:1rem 1.25rem;border-top:1px solid var(--border);}
   nav ul a::after{display:none;}
   .term-toggle kbd,.term-toggle .term-label{display:none;}

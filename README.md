@@ -14,6 +14,11 @@ Personal portfolio of Vansh Minhas, a full-stack developer and CS student at USI
 - **Case-study modal:** click a card (or "Case study") to see the problem, an architecture diagram, challenges, outcome, a screenshot and links.
 - **Hover preview:** a screenshot of the live demo follows the cursor over each card (via microlink.io; GitHub's social preview image as fallback).
 
+### Recruiter view and print
+- **Recruiter view:** a one-page summary (highlights, skills, top 3 projects, contact) shown first, with the hero, games, guestbook and custom cursor hidden. Turn it on from the hero link, the palette, or a link like `?recruiter` (`?recruiter=0` turns it off). The choice is saved.
+- **Print:** printing the page (or "Print a one-page summary" in the palette) prints only that summary, on one page, with link URLs written out.
+- Content comes from `BRIEF` in `js/config.js`; projects are the first three in `FEATURED_ORDER`.
+
 ### Journey
 An education, work and achievements timeline. The line draws itself as you scroll.
 
@@ -26,11 +31,14 @@ An education, work and achievements timeline. The line draws itself as you scrol
 ### Skills
 Switch between **Bars** and an interactive **Graph**. The graph links each skill to the projects that use it. Click a skill to highlight its projects, click a project to open its case study, and drag nodes around. Clicking a skill row in the bar view also filters the Projects section.
 
+### Writing
+Short posts about how the site was built, as plain pages in `posts/` (styled by `css/post.css`, no site scripts). Cards come from `POSTS` in `js/config.js`; to add a post, copy a page in `posts/` and add an entry there.
+
 ### Guestbook
 Visitor counter (abacus) and a guestbook powered by [giscus](https://giscus.app), which stores messages as GitHub Discussions.
 
 ### AI assistant
-"Ask about me" chat that answers questions from my resume and projects. It uses the Gemini API through the Node server in `server/`, so the API key never reaches the browser. Also available as `ask <question>` in the terminal.
+"Ask about me" chat that answers questions from my resume and projects. It uses the Gemini API through the Node server in `server/`, so the API key never reaches the browser. Also available as `ask <question>` in the terminal, and as "Ask the AI about it" in each project's case study. After each answer the chat suggests 2–3 follow-up questions (the server asks the model to end with a `[[next]] … | …` line, which the chat hides).
 
 ### Terminal (`Ctrl + K` or `` ` ``)
 

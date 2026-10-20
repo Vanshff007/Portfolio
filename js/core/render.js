@@ -34,3 +34,13 @@ document.getElementById('timeline').insertAdjacentHTML('beforeend', TIMELINE.map
       <p class="tl-text">${esc(t.text)}</p>
     </div>
   </li>`).join(''));
+
+/* ── Writing: post cards, built from POSTS ── */
+const fmtDate = iso => new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+document.getElementById('postsGrid').innerHTML = POSTS.map((p, i) => `
+  <a class="post-card reveal" style="transition-delay:${i * 0.08}s" href="posts/${esc(p.slug)}.html">
+    <div class="post-meta">${esc(fmtDate(p.date))} · ${p.minutes} min read</div>
+    <h3 class="post-title">${esc(p.title)}</h3>
+    <p class="post-desc">${esc(p.desc)}</p>
+    <div class="post-foot"><span>${p.tags.map(t => '#' + esc(t)).join(' ')}</span><span>Read →</span></div>
+  </a>`).join('');

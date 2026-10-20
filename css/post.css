@@ -1,0 +1,28 @@
+/* Styles for the posts in posts/. Kept apart from style.css so a post loads
+   no cursor, canvas or terminal code: just text that is easy to read. */
+@font-face{font-family:'Syne';src:url('../assets/fonts/syne-latin.woff2') format('woff2');font-weight:700 800;font-style:normal;font-display:swap;}
+@font-face{font-family:'JetBrains Mono';src:url('../assets/fonts/jetbrains-mono-latin.woff2') format('woff2');font-weight:400 700;font-style:normal;font-display:swap;}
+:root{--bg:#0a0a0f;--surface:#111118;--text:#e8e8f0;--muted:#8a8aa3;--accent:#00ff88;--border:rgba(255,255,255,0.08);--code:#0e0e15;}
+:root[data-theme="light"]{--bg:#f6f5f0;--surface:#ecebe4;--text:#16161d;--muted:#5c5c70;--accent:#00995a;--border:rgba(0,0,0,0.1);--code:#ecebe4;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font:15px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:0 16px;}
+.post-nav{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:1.4rem 0;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:0.75rem;}
+.post-nav a{color:var(--muted);text-decoration:none;}
+.post-nav a:hover{color:var(--accent);}
+.post-nav .logo{color:var(--text);font-size:1rem;}
+.post-nav .logo span{color:var(--accent);}
+article{max-width:720px;margin:0 auto;padding:3rem 0 4rem;}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,6vw,2.8rem);line-height:1.1;letter-spacing:-0.02em;margin:0.6rem 0 1rem;}
+.lead{font-size:1.05rem;color:var(--muted);}
+h2{font-family:'Syne',sans-serif;font-size:1.35rem;margin:2.6rem 0 0.8rem;}
+p,ul,ol,pre,figure{margin-bottom:1.1rem;}
+ul,ol{padding-left:1.3rem;}
+li{margin-bottom:0.35rem;}
+a{color:var(--accent);}
+strong{color:var(--text);}
+code{font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--code);border:1px solid var(--border);padding:0.05rem 0.35rem;}
+pre{background:var(--code);border:1px solid var(--border);padding:1rem 1.1rem;overflow-x:auto;font-size:0.8rem;line-height:1.65;}
+pre code{background:none;border:none;padding:0;font-size:inherit;}
+.note{border-left:2px solid var(--accent);padding:0.2rem 0 0.2rem 1rem;color:var(--muted);}
+.post-end{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
