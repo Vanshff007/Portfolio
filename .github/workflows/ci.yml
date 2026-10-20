@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  site:
+    name: Site checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          for f in $(git ls-files '*.js' '*.mjs'); do
+            echo "node --check $f"
+            node --check "$f"
+          done
+      - name: Local links and assets
+        run: node .github/scripts/check-links.mjs
+
+  server:
+    name: API server boots
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      # No API keys in CI: the chat reports itself as off, but the server must start and answer
+      - name: Start and call /api/health
+        run: |
+          node server.js &
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:3000/api/health && exit 0
+            sleep 0.5
+          done
+          echo "Server did not answer /api/health" >&2
+          exit 1
