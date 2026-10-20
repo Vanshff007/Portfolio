@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playing Pac-Man on my GitHub contribution graph · Vansh Minhas</title>
+<meta name="description" content="Turning a year of commits into a Pac-Man maze: pellets from contribution levels, walls that never trap a pellet, and ghosts that chase with BFS.">
+<link rel="canonical" href="https://vanshff007.github.io/Portfolio/posts/pacman-on-my-github-graph.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Playing Pac-Man on my GitHub contribution graph">
+<meta property="og:description" content="Turning a year of commits into a maze, with walls that never trap a pellet and ghosts that chase with BFS.">
+<meta property="og:image" content="https://vanshff007.github.io/Portfolio/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  // Same theme as the main site: light if saved or if the system is light, dark otherwise
+  (function () {
+    let t = null;
+    try { t = localStorage.getItem('theme'); } catch {}
+    if (t === 'light' || (!t && matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme = 'light';
+  })();
+</script>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/post.css">
+</head>
+<body>
+<nav class="post-nav"><a class="logo" href="../">vansh<span>.</span>dev</a><a href="../#writing">← All writing</a></nav>
+<article>
+  <div class="kicker">20 Oct 2026 · 5 min read · #canvas #games #bfs</div>
+  <h1>Playing Pac-Man on my GitHub contribution graph</h1>
+  <p class="lead">My portfolio shows my GitHub contribution graph: a year of days as a grid of green squares. Click it and it turns into a Pac-Man level. Every day I committed is a pellet. This post is how that works.</p>
+
+  <h2>From squares to a grid</h2>
+  <p>The heatmap is drawn from a list of days, each with a level from 0 (no contributions) to 4 (my busiest days). The game reads the same data and turns it into columns of 7 rows, one column per week, so the board looks exactly like the graph you just clicked.</p>
+<pre><code>const cells = [...Array(h.offset).fill(null), ...h.days];
+const cols = Math.ceil(cells.length / 7);
+const grid = Array.from({ length: cols }, (_, c) =>
+  Array.from({ length: 7 }, (_, r) => cells[c * 7 + r]?.level ?? 0));</code></pre>
+  <p>The level sets the pellet's value: 10 points per level. Level 4 days are power pellets, so my most productive days are the ones that let you eat the ghosts.</p>
+
+  <h2>Walls that never trap a pellet</h2>
+  <p>A grid with no walls is boring, so the game adds short wall pieces, 2 to 4 cells long. Two rules keep it fair:</p>
+  <ul>
+    <li><strong>Walls only go on empty days.</strong> A wall never covers a pellet, so it stays my real graph.</li>
+    <li><strong>Every open cell must stay reachable.</strong> After placing a piece, a flood fill starts from Pac-Man's spawn and counts the cells it can reach. If that count is lower than the number of open cells, the piece cut something off, and it is removed.</li>
+  </ul>
+<pre><code>cells.forEach(([x, y]) => { walls[x][y] = true; });
+if (reachable() !== open()) cells.forEach(([x, y]) => { walls[x][y] = false; });
+else placed += len;</code></pre>
+  <p>It stops when walls cover about 30% of the empty days. The random numbers come from a small seeded generator, and the seed is made from the graph itself. So the maze is the same on every visit, and it changes only when my contributions do.</p>
+
+  <h2>Ghosts that chase with BFS</h2>
+  <p>On a maze, "move toward Pac-Man" in a straight line gets ghosts stuck behind walls. Each ghost instead runs a breadth-first search from its target and builds a distance map of the whole board. At every step it takes the neighbouring cell with the smallest distance.</p>
+  <p>To make the ghosts feel different, each one aims at a different spot: one goes straight at you, one aims 3 cells ahead of you, one aims 2 behind, one 2 ahead. They also cannot reverse direction, and they take a random turn 15% of the time, so you can get away.</p>
+  <p>After a power pellet, the same distance map works in reverse: frightened ghosts pick the neighbour with the <em>largest</em> distance and run away, with more random turns (35%).</p>
+
+  <h2>Catching ghosts that pass through you</h2>
+  <p>Checking only whether a ghost and Pac-Man share a cell is not enough. They move one cell per step, so they can swap cells in the same tick and pass right through each other. A swap counts as a hit too: the ghost is where Pac-Man was, and Pac-Man is where the ghost was.</p>
+<pre><code>const same = gh.x === pac.x &amp;&amp; gh.y === pac.y;
+const swapped = gh.x === pac.px &amp;&amp; gh.y === pac.py &amp;&amp; gh.px === pac.x &amp;&amp; gh.py === pac.y;</code></pre>
+
+  <h2>The extras</h2>
+  <ul>
+    <li><strong>Power-ups</strong> appear now and then: speed, frozen ghosts, a magnet that pulls in pellets 2 cells away, double points, and an extra life.</li>
+    <li><strong>A camera</strong> follows Pac-Man when a year of weeks is wider than the screen, so it works on phones too, with touch controls.</li>
+    <li><strong>The LeetCode graph</strong> next to it is a Space Shooter instead: each day I submitted is an enemy block, and brighter blocks take more hits.</li>
+  </ul>
+
+  <p class="note">The full code is in <a href="https://github.com/Vanshff007/Portfolio/blob/main/js/extras/heatmap-games.js">js/extras/heatmap-games.js</a>. No libraries, just the canvas API.</p>
+
+  <div class="post-end"><a href="../#activity">▶ Play it on the site</a><a href="../#writing">← All writing</a></div>
+</article>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hunting forced reflows on a no-framework site · Vansh Minhas</title>
+<meta name="description" content="Two scroll handlers were forcing about 170 ms of layout on load, and the cursor repainted the screen on every move. What I changed, and why.">
+<link rel="canonical" href="https://vanshff007.github.io/Portfolio/posts/hunting-forced-reflows.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hunting forced reflows on a no-framework site">
+<meta property="og:description" content="Two scroll handlers forced about 170 ms of layout on load. What I changed, and why.">
+<meta property="og:image" content="https://vanshff007.github.io/Portfolio/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  // Same theme as the main site: light if saved or if the system is light, dark otherwise
+  (function () {
+    let t = null;
+    try { t = localStorage.getItem('theme'); } catch {}
+    if (t === 'light' || (!t && matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme = 'light';
+  })();
+</script>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/post.css">
+</head>
+<body>
+<nav class="post-nav"><a class="logo" href="../">vansh<span>.</span>dev</a><a href="../#writing">← All writing</a></nav>
+<article>
+  <div class="kicker">20 Oct 2026 · 4 min read · #performance #lighthouse</div>
+  <h1>Hunting forced reflows on a no-framework site</h1>
+  <p class="lead">My portfolio is plain HTML, CSS and JavaScript. No framework, no build step. That does not make it fast by default. Lighthouse found the main thread stuck on layout work I had written myself.</p>
+
+  <h2>What a forced reflow is</h2>
+  <p>The browser batches layout: you change styles, and it works out positions later, once per frame. But if you <em>read</em> a layout value (<code>scrollHeight</code>, <code>getBoundingClientRect()</code>, <code>offsetTop</code>) right after a change, the browser has to do the layout now, synchronously, to give you a correct number. Do that in a loop or on every scroll event and it adds up fast.</p>
+
+  <h2>Fix 1: the scroll progress bar (about 60 ms)</h2>
+  <p>The bar at the top of the page read <code>document.documentElement.scrollHeight</code> on load and on every scroll. Lighthouse measured about 60 ms of forced layout on load from that one line.</p>
+  <p>The page height only changes when the layout changes, so now it is cached and refreshed by a <code>ResizeObserver</code> and on window resize. The scroll handler only reads <code>scrollY</code>, which is cheap.</p>
+<pre><code>let maxScroll = 0;
+function measure() {
+  maxScroll = document.documentElement.scrollHeight - innerHeight;
+  onScroll();
+}
+new ResizeObserver(measure).observe(document.body);</code></pre>
+  <p>That one change took the Lighthouse performance score from 88 to 98.</p>
+
+  <h2>Fix 2: the journey timeline (about 113 ms)</h2>
+  <p>The timeline line draws itself as you scroll, and each item lights up when the line reaches it. The old handler toggled a class on one item and then read the next item's rect. Read, write, read, write: one forced layout per item, about 113 ms on load.</p>
+  <p>The fix follows one rule: <strong>all reads first, then all writes</strong>.</p>
+  <ul>
+    <li>Item offsets come from <code>offsetTop</code> once, in a <code>ResizeObserver</code>, not on every scroll.</li>
+    <li>Each frame reads one rect (the list's), then writes the line's transform and the classes.</li>
+    <li>Scroll work is throttled to <code>requestAnimationFrame</code>, and it runs only while an <code>IntersectionObserver</code> says the timeline is on screen.</li>
+  </ul>
+
+  <h2>Fix 3: work that ran on every frame</h2>
+  <p>Even with the mouse still, the page did style and layout work on every frame, and the pointer felt laggy. The causes were small:</p>
+  <ul>
+    <li>The scroll hint animated <code>left</code>, which is a layout property. Now it animates <code>transform</code>.</li>
+    <li>The "live" dots pulsed with an animated <code>box-shadow</code>, which repaints. Now a second dot scales and fades.</li>
+    <li>The hero's particles and CSS animations now pause while the hero is off screen.</li>
+  </ul>
+
+  <h2>Fix 4: a cursor that repainted the screen</h2>
+  <p>The custom cursor is a dot and a ring that follow the pointer. They moved with <code>translate</code>, so no layout, but every move still repainted the area under them, and that includes a full-screen noise texture. On integrated graphics at 144 Hz, frames dropped and the cursor fell behind.</p>
+<pre><code>.cursor, .cursor-ring { will-change: translate; }</code></pre>
+  <p>One line gives both their own compositor layer, so moving them repaints nothing. The cursor also stops its animation loop once the ring catches up, so an idle mouse costs nothing.</p>
+
+  <h2>What I took away</h2>
+  <ul>
+    <li>Read Lighthouse's "Avoid forced reflow" list. It names the function and the time.</li>
+    <li>Cache layout values and refresh them from observers, not from scroll events.</li>
+    <li>Animate <code>transform</code> and <code>opacity</code>. Anything else, check the Performance panel first.</li>
+    <li>Pause what is off screen.</li>
+  </ul>
+
+  <p class="note">The site now scores 91 for performance and 100 for accessibility, best practices and SEO (live site, median of 3 runs).</p>
+
+  <div class="post-end"><a href="https://github.com/Vanshff007/Portfolio">Source on GitHub ↗</a><a href="../#writing">← All writing</a></div>
+</article>
+</body>
+</html>

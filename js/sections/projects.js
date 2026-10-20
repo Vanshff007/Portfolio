@@ -165,7 +165,12 @@ let PROJECTS = [];
       <div class="modal-actions">
         ${p.demo ? `<a class="btn btn-primary" href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer">Live Demo</a>` : ''}
         <a class="btn btn-ghost" href="${esc(p.repoUrl)}" target="_blank" rel="noopener noreferrer">Source Code ↗</a>
+        ${window.openChat ? `<button class="btn btn-ghost" type="button" id="modalAsk">✦ Ask the AI about it</button>` : ''}
       </div>`;
+    document.getElementById('modalAsk')?.addEventListener('click', () => {
+      closeModal();
+      openChat(`Tell me about ${p.title}. What did Vansh build, and what was the hardest part?`);
+    });
     lastFocus = document.activeElement;
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');

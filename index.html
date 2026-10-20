@@ -22,7 +22,14 @@
   // Apply the theme before first paint, so there is no flash: the saved one,
   // or the system's light/dark setting when the visitor has not picked one
   (function () {
-    let t = null;
+    let t = null, view = null;
+    try {
+      // Recruiter view: ?recruiter turns it on (and remembers it), ?recruiter=0 turns it off
+      const q = new URLSearchParams(location.search).get('recruiter');
+      if (q !== null) localStorage.setItem('view', q === '0' ? 'full' : 'recruiter');
+      view = localStorage.getItem('view');
+    } catch {}
+    if (view === 'recruiter') document.documentElement.classList.add('recruiter');
     try { t = localStorage.getItem('theme'); } catch {}
     t = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     if (t === 'dark') return;
@@ -128,6 +135,7 @@
       <li><a href="#projects">Projects</a></li>
       <li><a href="#activity">Activity</a></li>
       <li><a href="#skills">Skills</a></li>
+      <li><a href="#writing">Writing</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <button class="icon-btn" id="themeBtn" aria-label="Change theme" title="Change theme">◐</button>
@@ -149,9 +157,15 @@
     <a href="assets/resume.pdf" class="btn btn-ghost" id="resumeBtn" download="Vansh_Minhas_Resume.pdf">Resume ↓</a>
     <a href="#contact" class="btn btn-ghost">Get In Touch</a>
   </div>
+  <p class="hero-quick">In a hurry? <button type="button" class="link-btn" data-view="recruiter">Switch to the one-page recruiter view →</button></p>
   <p class="hero-hint">Prefer the keyboard? <kbd>Ctrl</kbd> + <kbd>K</kbd> opens a terminal, <kbd>Ctrl</kbd> + <kbd>P</kbd> searches everything.</p>
   <a class="hero-badge" href="#contact" aria-label="Open to work: contact me">Open · to · work · Contact · me ↓</a>
   <div class="scroll-hint"><div class="scroll-line"></div>Scroll to explore</div>
+</section>
+
+<!-- One-page summary: shown in recruiter view and when printing (built by js/sections/brief.js) -->
+<section id="brief" aria-labelledby="briefName">
+  <div class="brief" id="briefBody"></div>
 </section>
 
 <section id="about">
@@ -318,6 +332,15 @@
   </div>
 </section>
 
+<section id="writing">
+  <div class="section-header reveal">
+    <span class="section-num"></span>
+    <h2 class="section-title">Writing</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="posts-grid" id="postsGrid"></div>
+</section>
+
 <section id="guestbook">
   <div class="section-header reveal">
     <span class="section-num"></span>
@@ -419,5 +442,6 @@
 <script src="js/sections/skills-graph.js" defer></script>
 <script src="js/extras/heatmap-games.js" defer></script>
 <script src="js/sections/chat.js" defer></script>
+<script src="js/sections/brief.js" defer></script>
 </body>
 </html>

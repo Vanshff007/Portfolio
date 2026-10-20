@@ -66,6 +66,30 @@ const TIMELINE = [
     text: 'Mentored first-year students in DSA bootcamps, teaching graph traversal (BFS, DFS) with live coding. Helped run coding and competitive programming events.' },
 ];
 
+/* ── Recruiter view and print: the one-page summary (#brief) ──
+   Keep in sync with TIMELINE and the resume. Projects come from FEATURED_ORDER. */
+const BRIEF = {
+  role: 'Full-Stack Developer · B.Tech CS, USICT (GGSIPU), 2023 – 2027',
+  pitch: 'I build real-time web apps and AI/ML tools end to end, from the Socket.io server to the UI. Open to internships.',
+  highlights: [
+    ['Education',   'B.Tech Computer Science, USICT (GGSIPU), New Delhi. CGPA 8.1.'],
+    ['Internship',  'MERN Stack Web Development Intern, Coding Samurai (Jul – Sep 2025). REST APIs, auth, deployment on Vercel.'],
+    ['Leadership',  'Executive Member, ACM-ICPC Club USICT (2025 – 2026). Mentored first-years in DSA bootcamps.'],
+    ['Problem solving', '505+ LeetCode problems, 1743 contest rating (top 11%).'],
+    ['Competitions', '3rd place, Hack-O-Knight Hackathon. Rank 2463, Amazon ML Challenge.'],
+  ],
+};
+
+/* ── Writing: posts live in posts/<slug>.html (newest first) ── */
+const POSTS = [
+  { slug: 'pacman-on-my-github-graph', date: '2026-10-20', minutes: 5, tags: ['canvas', 'games', 'bfs'],
+    title: 'Playing Pac-Man on my GitHub contribution graph',
+    desc: 'Turning a year of commits into a maze: pellets from contribution levels, walls that never trap a pellet, and ghosts that chase with BFS.' },
+  { slug: 'hunting-forced-reflows', date: '2026-10-20', minutes: 4, tags: ['performance', 'lighthouse'],
+    title: 'Hunting forced reflows on a no-framework site',
+    desc: 'Two scroll handlers were forcing about 170 ms of layout on load, and the cursor repainted the screen on every move. What I changed, and why.' },
+];
+
 /* ── Projects ─────────────────────────────────────────────────────
    Repo list, stars, dates and links come from the GitHub API.
    PROJECT_INFO adds curated titles, descriptions and stacks, since the

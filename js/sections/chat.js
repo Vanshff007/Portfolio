@@ -20,6 +20,21 @@
     log.scrollTop = log.scrollHeight;
     return el;
   }
+  // The server ends each answer with "[[next]] question | question" (follow-up ideas).
+  // Hide that part, including a marker still arriving mid-stream.
+  const MARK = '[[next]]';
+  function split(t) {
+    const i = t.indexOf('[[');
+    if (i < 0) return { answer: t.replace(/\[$/, ''), next: [] };
+    const tail = t.slice(i);
+    const next = tail.startsWith(MARK) ? tail.slice(MARK.length).split('|').map(s => s.trim()).filter(s => s.length > 3 && s.length < 120).slice(0, 3) : [];
+    return { answer: t.slice(0, i).trimEnd(), next };
+  }
+  function showSuggestions(list) {
+    suggest.replaceChildren(...list.map(q => Object.assign(document.createElement('button'), { type: 'button', textContent: q })));
+    suggest.hidden = !list.length;
+  }
+
   // Light formatting: **bold** and bare links, applied to escaped text
   const format = t => esc(t)
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
@@ -59,10 +74,12 @@
         const { value, done } = await reader.read();
         if (done) break;
         text += dec.decode(value, { stream: true });
-        out.innerHTML = format(text);
+        out.innerHTML = format(split(text).answer);
         log.scrollTop = log.scrollHeight;
       }
-      history.push({ role: 'assistant', content: text });
+      const { answer, next } = split(text);
+      history.push({ role: 'assistant', content: answer || text });
+      showSuggestions(next);
     } catch (e) {
       out.classList.add('error');
       out.textContent = e.message.startsWith('Too many') ? e.message : `Couldn't reach the assistant. Email Vansh at ${SITE.email} instead.`;
